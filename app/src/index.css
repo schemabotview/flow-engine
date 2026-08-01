@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+/* Scene stage palette. `bg-scene` is the dark canvas both panes sit on. */
+@theme {
+  --color-scene: #0f1115;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}

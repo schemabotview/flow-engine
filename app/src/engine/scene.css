@@ -1,0 +1,193 @@
+/* Calm filled blocks. Color lives in a muted FILL mixed into a dark base — no glow, no
+   neon. The lit/dimmed rules are pre-wired for the reveal slices that flip them. */
+
+.scene-flow {
+  width: 100%;
+  height: 100%;
+}
+
+/* React Flow chrome resets: we draw our own nodes, no default card/pane bg. */
+.scene-flow .react-flow,
+.scene-flow .react-flow__pane {
+  background: transparent;
+}
+.scene-flow .react-flow__node {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: inherit;
+  color: inherit;
+  cursor: default;
+}
+/* Lift edges above the filled nodes/containers so connections aren't hidden behind a fill. */
+.scene-flow .react-flow__edges {
+  z-index: 3;
+}
+.scene-handle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- Node base ------------------------------------------------------------- */
+.scene-node {
+  --base: #1f1f1f; /* mix seed — a touch lighter than the scene bg */
+  --fill: color-mix(in srgb, var(--node-color) 30%, var(--base));
+  --line: color-mix(in srgb, var(--node-color) 45%, var(--base));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 4px;
+  line-height: 1.2;
+  transition: opacity 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.scene-node__label {
+  font-weight: 700;
+  color: #f4f6fb;
+  padding: 0 6px;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+.scene-node__sub {
+  margin-top: 4px;
+  font-size: 0.72em;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--node-color) 60%, #ffffff 40%);
+}
+
+/* --- symbol: a filled role-colored block ---------------------------------- */
+.scene-node--symbol {
+  background: var(--fill);
+  border: 1px solid var(--line);
+}
+
+/* --- term: a filled chip whose text IS the concept ------------------------ */
+.scene-node--term {
+  background: color-mix(in srgb, var(--node-color) 34%, var(--base));
+  border: 1px solid var(--line);
+}
+.scene-node--term .scene-node__label {
+  font-weight: 400;
+  color: #f1f2f4;
+  padding: 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* --- ERD row: a term carrying a data type — name left, type right --------- */
+.scene-node__row {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 10px;
+}
+.scene-node__row .scene-node__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  padding: 0;
+}
+.scene-node__type {
+  flex: none;
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--node-color) 52%, #cfd4de 48%);
+}
+
+/* --- container: subtle titled panel; title rides the top-left border ------- */
+.scene-node--container {
+  background: color-mix(in srgb, var(--node-color) 12%, var(--base));
+  border: 1px solid color-mix(in srgb, var(--node-color) 28%, var(--base));
+  align-items: flex-start;
+  justify-content: flex-start;
+  border-radius: 5px;
+}
+.scene-node--container .scene-node__title {
+  position: absolute;
+  top: 0;
+  left: 7px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 4px;
+  background: color-mix(in srgb, var(--node-color) 12%, var(--base));
+  color: color-mix(in srgb, var(--node-color) 75%, #cfd4dc);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* --- ghost: the unrevealed skeleton a reveal builds up from ----------------
+   Draw the full structure faintly — a dim outline, no fill, muted gray label — so the
+   shape of what's coming reads WITHOUT competing with what's solid. Distinct from
+   --dimmed (a revealed-but-out-of-focus node at 0.55): ghost is emptier and fainter. */
+.scene-node--ghost {
+  opacity: 0.6;
+}
+.scene-node--ghost.scene-node--symbol,
+.scene-node--ghost.scene-node--term {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--node-color) 26%, var(--base));
+}
+.scene-node--ghost.scene-node--container {
+  background: transparent;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--node-color) 20%, var(--base));
+}
+.scene-node--ghost .scene-node__label,
+.scene-node--ghost .scene-node__title,
+.scene-node--ghost .scene-node__type {
+  color: #5b6473;
+  font-weight: 500;
+}
+.scene-node--ghost .scene-node__sub {
+  color: #4c5563;
+}
+
+/* --- focus states (pre-wired for the reveal slices) ----------------------- */
+.scene-node--lit {
+  border-color: color-mix(in srgb, var(--node-color) 62%, var(--base));
+}
+.scene-node--lit.scene-node--term {
+  background: color-mix(in srgb, var(--node-color) 44%, var(--base));
+}
+.scene-node--lit.scene-node--symbol {
+  background: color-mix(in srgb, var(--node-color) 40%, var(--base));
+}
+.scene-node--dimmed {
+  opacity: 0.55;
+}
+
+/* --- edge label ----------------------------------------------------------- */
+.react-flow__edgelabel-renderer {
+  z-index: 6;
+}
+.scene-edge-label {
+  position: absolute;
+  color: #eef0f5;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow:
+    0 0 3px #14161b,
+    0 0 3px #14161b,
+    0 0 6px #14161b,
+    0 1px 2px rgba(0, 0, 0, 0.85);
+}
