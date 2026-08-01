@@ -49,7 +49,7 @@ export default function App() {
   // Per-beat narration by convention: `audio/<section-id>-<beatIndex>.wav`. On clip-end
   // roll forward one beat (across sections); at the course's very end, stop. SPACE toggles.
   const audioUrl = `${import.meta.env.BASE_URL}audio/${section.id}-${pos.beat}.wav`
-  const { playing, toggle, stop } = useNarration(audioUrl, () =>
+  const { toggle, stop } = useNarration(audioUrl, () =>
     setPos((p) => {
       const next = step(course.sections, p, 1)
       if (next.section === p.section && next.beat === p.beat) stop() // clamped at the end
@@ -88,19 +88,10 @@ export default function App() {
           <div style={{ width: SCENE_W }} className="border-r border-white/10">
             {scene && <SceneViewer scene={scene} reveal={reveal} />}
           </div>
-          {/* Right pane: the section's static slide, with a per-beat narration caption bar
-              below it (the slide holds while beats advance). */}
-          <div style={{ width: SLIDE_W }} className="flex flex-col">
-            <div className="flex flex-1 flex-col justify-center">
-              <SlidePane slide={section.slide} />
-            </div>
-            <div className="border-t border-white/10 px-16 py-8">
-              <div className="mb-3 text-xs uppercase tracking-widest text-white/30">
-                §{pos.section + 1}/{course.sections.length} · beat {pos.beat + 1}/{section.beats.length} ·{' '}
-                {playing ? '▶ playing' : '⏸ paused'} · SPACE / ← →
-              </div>
-              <div className="text-xl leading-snug text-white/75">{section.beats[pos.beat].line}</div>
-            </div>
+          {/* Right pane: the section's static slide (the capture frame — no dev chrome).
+              Narration is heard, not shown; transport is SPACE / ← →. */}
+          <div style={{ width: SLIDE_W }} className="flex flex-col justify-center">
+            <SlidePane slide={section.slide} />
           </div>
         </div>
       </div>
