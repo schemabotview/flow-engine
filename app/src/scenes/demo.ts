@@ -4,8 +4,8 @@ import { BLUE, GREEN, ORANGE, PURPLE } from '../engine/colors.ts'
 // A small hardcoded scene: a Master container holding Driver + SparkSession, a Cluster
 // Manager, and two Worker Nodes, wired left→right. Exercises the rendering NodeKinds
 // (symbol, container) plus floating labelled edges. The SCENE is structure (app-owned);
-// the beats that assemble it are CONTENT and live with their section (content/course.ts),
-// because one scene can be ridden by many sections, each with its own beats.
+// the beats that assemble it are CONTENT, fetched per concept from its content repo
+// (apache-spark-content/manifest.json), because one scene can be ridden by many sections.
 export const demo: SceneSpec = {
   id: 'demo',
   title: 'Demo — the cluster',
