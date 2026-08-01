@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "gen:scene-ids": "node --experimental-strip-types scripts/gen-scene-ids.ts",
+    "build": "npm run gen:scene-ids && tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

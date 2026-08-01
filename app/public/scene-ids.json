@@ -1,0 +1,33 @@
+{
+  "demo": {
+    "nodes": [
+      "cluster-mgr",
+      "driver",
+      "master",
+      "session",
+      "worker-a",
+      "worker-b"
+    ],
+    "edges": [
+      "cluster-mgr->worker-a",
+      "cluster-mgr->worker-b",
+      "driver->session",
+      "session->cluster-mgr"
+    ]
+  },
+  "executor": {
+    "nodes": [
+      "core-1",
+      "core-2",
+      "disk",
+      "execution",
+      "executor",
+      "heap",
+      "storage"
+    ],
+    "edges": [
+      "core-1->disk",
+      "core-2->disk"
+    ]
+  }
+}
