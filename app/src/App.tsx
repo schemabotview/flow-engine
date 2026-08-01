@@ -1,10 +1,10 @@
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { SceneViewer } from './engine/SceneViewer.tsx'
-import { revealAt } from './engine/reveal.ts'
 import { useNarration } from './hooks/useNarration.ts'
 import { getScene } from './scenes/index.ts'
 import { SlidePane } from './frame/SlidePane.tsx'
 import { course } from './content/course.ts'
+import { revealForPosition, step, type Position } from './content/nav.ts'
 
 // The canonical frame: Full HD, landscape 16:9 (YouTube / Udemy). A later capture
 // recorder records at a 1920×1080 viewport, so at capture time scale === 1.
@@ -30,34 +30,30 @@ function useFitScale() {
 export default function App() {
   const scale = useFitScale()
 
-  // One section for now (slice 7 wires content in-repo; multi-section rollover is next).
-  const section = course.sections[0]
+  // The (section, beat) cursor. ←/→ page beats and roll across section boundaries; reveal
+  // is a PURE FOLD over the current scene-run (revealForPosition), never mutated forward —
+  // so paging back, or crossing into a new scene, always derives the truthful partial state.
+  const [pos, setPos] = useState<Position>({ section: 0, beat: 0 })
+  const section = course.sections[pos.section]
   const scene = getScene(section.scene)
-  const beats = section.beats
-
-  // The beat cursor. ←/→ page beats; reveal is a PURE FOLD of this index (revealAt),
-  // never mutated forward — so paging back re-derives the earlier partial reveal exactly.
-  const [beat, setBeat] = useState(0)
-  const reveal = useMemo(() => revealAt(beats, beat), [beats, beat])
+  const reveal = useMemo(() => revealForPosition(course.sections, pos), [pos])
 
   // Per-beat narration by convention: `audio/<section-id>-<beatIndex>.wav`. On clip-end
-  // auto-advance to the next beat; on the last beat, stop. SPACE toggles play/pause.
-  const audioUrl = `${import.meta.env.BASE_URL}audio/${section.id}-${beat}.wav`
+  // roll forward one beat (across sections); at the course's very end, stop. SPACE toggles.
+  const audioUrl = `${import.meta.env.BASE_URL}audio/${section.id}-${pos.beat}.wav`
   const { playing, toggle, stop } = useNarration(audioUrl, () =>
-    setBeat((b) => {
-      if (b >= beats.length - 1) {
-        stop()
-        return b
-      }
-      return b + 1
+    setPos((p) => {
+      const next = step(course.sections, p, 1)
+      if (next.section === p.section && next.beat === p.beat) stop() // clamped at the end
+      return next
     }),
   )
 
   // Transport keys, re-bound each render so they see the latest toggle/stop.
   useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') setBeat((b) => Math.min(b + 1, beats.length - 1))
-      else if (e.key === 'ArrowLeft') setBeat((b) => Math.max(b - 1, 0))
+      if (e.key === 'ArrowRight') setPos((p) => step(course.sections, p, 1))
+      else if (e.key === 'ArrowLeft') setPos((p) => step(course.sections, p, -1))
       else if (e.key === ' ') {
         e.preventDefault()
         toggle()
@@ -92,9 +88,10 @@ export default function App() {
             </div>
             <div className="border-t border-white/10 px-16 py-8">
               <div className="mb-3 text-xs uppercase tracking-widest text-white/30">
-                Beat {beat + 1} / {beats.length} · {playing ? '▶ playing' : '⏸ paused'} · SPACE / ← →
+                §{pos.section + 1}/{course.sections.length} · beat {pos.beat + 1}/{section.beats.length} ·{' '}
+                {playing ? '▶ playing' : '⏸ paused'} · SPACE / ← →
               </div>
-              <div className="text-xl leading-snug text-white/75">{beats[beat].line}</div>
+              <div className="text-xl leading-snug text-white/75">{section.beats[pos.beat].line}</div>
             </div>
           </div>
         </div>

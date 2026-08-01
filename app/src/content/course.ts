@@ -1,8 +1,9 @@
 import type { Course } from './types.ts'
 
-// The in-repo content for this app. One section for now (slice 7); multi-section rollover
-// and the scene-reset boundary land in the next slice. The `scene` field names a scene in
-// the registry (scenes/index.ts); the `beats` reference that scene's raw node ids.
+// The in-repo content for this app. Two sections that SHARE the `demo` scene — so reveal
+// accumulates across them (a "scene run"): section 1 assembles the control plane, section
+// 2 continues by revealing the workers WITHOUT re-ghosting section 1's nodes. A section
+// that switched to a different scene would instead enter fully ghosted (slice 9).
 export const course: Course = {
   concept: 'Spark (demo)',
   sections: [
@@ -15,12 +16,9 @@ export const course: Course = {
         bullets: [
           'The driver owns the SparkSession and builds the plan',
           'The cluster manager allocates machines to the app',
-          'Executors run the work on the worker nodes',
+          'Work is submitted to the manager for scheduling',
         ],
       },
-      // A hand storyboard that assembles the cluster. Beat 0 solidifies the frame (the
-      // empty labelled stage), then each beat fills in a subsystem. Edges auto-solidify
-      // once both endpoints are revealed; the explicit `draw` deltas demonstrate the verb.
       beats: [
         {
           line: 'Here is the cluster we are about to assemble.',
@@ -37,11 +35,56 @@ export const course: Course = {
             { kind: 'draw', edges: [['session', 'cluster-mgr']] },
           ],
         },
+      ],
+    },
+    {
+      id: 'the-worker-nodes',
+      heading: 'The worker nodes',
+      scene: 'demo', // SAME scene → reveal continues from section 1 (accumulation)
+      slide: {
+        title: 'The worker nodes',
+        bullets: [
+          'The cluster manager launches executors on the workers',
+          'Each executor holds partitions in memory',
+          'Cores run tasks across the cluster in parallel',
+        ],
+      },
+      beats: [
         {
           line: 'Which launches executors on the worker nodes.',
           delta: [
             { kind: 'solidify', ids: ['worker-a', 'worker-b'] },
             { kind: 'draw', edges: [['cluster-mgr', 'worker-a'], ['cluster-mgr', 'worker-b']] },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'inside-the-executor',
+      heading: 'Inside an executor',
+      scene: 'executor', // DIFFERENT scene → a fresh scene run: enters fully ghosted (reset)
+      slide: {
+        title: 'Inside an executor',
+        bullets: [
+          'The heap splits into execution and storage memory',
+          'Each core runs one task per partition',
+          'Data spills to local disk when memory is tight',
+        ],
+      },
+      beats: [
+        {
+          line: 'Now zoom into a single executor.',
+          delta: [{ kind: 'solidify', ids: ['executor'] }],
+        },
+        {
+          line: 'Its heap splits into execution and storage memory.',
+          delta: [{ kind: 'solidify', ids: ['heap', 'execution', 'storage'] }],
+        },
+        {
+          line: 'Cores run tasks and spill to local disk under memory pressure.',
+          delta: [
+            { kind: 'solidify', ids: ['core-1', 'core-2', 'disk'] },
+            { kind: 'draw', edges: [['core-1', 'disk'], ['core-2', 'disk']] },
           ],
         },
       ],
