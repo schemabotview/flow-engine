@@ -5,6 +5,14 @@ import { getScene } from './scenes/index.ts'
 import { SlidePane } from './frame/SlidePane.tsx'
 import { course } from './content/course.ts'
 import { revealForPosition, step, type Position } from './content/nav.ts'
+import { validateCourse } from './content/validate.ts'
+
+// Fail loud at load in dev too (the build runs the same check via `npm run validate`), so
+// a beat referencing a renamed scene node surfaces immediately, not silently at play time.
+if (import.meta.env.DEV) {
+  const errors = validateCourse(course.sections, getScene)
+  if (errors.length) console.error('[content] validation failed:\n' + errors.map((e) => '  ✗ ' + e).join('\n'))
+}
 
 // The canonical frame: Full HD, landscape 16:9 (YouTube / Udemy). A later capture
 // recorder records at a 1920×1080 viewport, so at capture time scale === 1.

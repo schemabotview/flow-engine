@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "validate": "node --experimental-strip-types scripts/validate-content.ts",
+    "build": "npm run validate && tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
