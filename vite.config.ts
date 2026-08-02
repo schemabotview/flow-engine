@@ -9,11 +9,11 @@ import dts from 'vite-plugin-dts'
 export default defineConfig({
   plugins: [
     react(),
-    dts({ tsconfigPath: './tsconfig.json', rollupTypes: true, include: ['app/src'] }),
+    dts({ tsconfigPath: './tsconfig.json', rollupTypes: true, include: ['src'] }),
   ],
   build: {
     lib: {
-      entry: 'app/src/index.ts',
+      entry: 'src/index.ts',
       formats: ['es'],
       fileName: 'flow-engine',
     },
