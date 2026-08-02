@@ -1,4 +1,4 @@
-import { Key as U, GitBranch as Z, Table as j, Terminal as V, ScrollText as q, Box as J, ShieldCheck as Q, Users as ee, KeyRound as te, Layers as ne, Clock as oe, Workflow as se, MemoryStick as ie, HardDrive as ce, Server as re, AppWindow as ae, Share2 as le, Webhook as de, Plug as ue, Copy as he, DownloadCloud as fe, Network as me, Radio as ge, Cloud as pe, File as be, Zap as ye, Image as we, Braces as ke, Waves as xe, Cpu as Ee, Cog as Ne, Filter as Se, Brain as _e, FileBarChart as Me, BarChart3 as Ae, Database as $e } from "lucide-react";
+import { Key as U, GitBranch as Z, Table as j, Terminal as V, ScrollText as q, Box as J, ShieldCheck as Q, Users as ee, KeyRound as te, Layers as ne, Clock as oe, Workflow as se, MemoryStick as ie, HardDrive as ce, Server as re, AppWindow as ae, Share2 as le, Webhook as de, Plug as he, Copy as ue, DownloadCloud as fe, Network as me, Radio as ge, Cloud as pe, File as be, Zap as ye, Image as we, Braces as ke, Waves as xe, Cpu as Ee, Cog as Ne, Filter as Se, Brain as _e, FileBarChart as Me, BarChart3 as Ae, Database as $e } from "lucide-react";
 import { jsx as d, jsxs as y, Fragment as F } from "react/jsx-runtime";
 import { useMemo as N, useRef as $, useState as R, useEffect as P, useLayoutEffect as O } from "react";
 import { MarkerType as ve, Handle as B, Position as w, useInternalNode as T, useStore as Le, getSmoothStepPath as ze, getBezierPath as Ce, BaseEdge as Re, EdgeLabelRenderer as Pe, ReactFlow as Be } from "@xyflow/react";
@@ -29,8 +29,8 @@ const gt = (t, e) => ({ ...t, kind: "container", cell: [0, 0], layout: e.grid, c
   stream: ge,
   federation: me,
   autoload: fe,
-  copy: he,
-  plug: ue,
+  copy: ue,
+  plug: he,
   api: de,
   share: le,
   app: ae,
@@ -61,11 +61,11 @@ function W(t, e, o, n) {
 }
 function K(t, e, o, n) {
   var g;
-  const { gap: s = 0.2, padding: i = 0.4 } = e, r = W(S(e.cols), o.w, s, i), a = W(S(e.rows), o.h, s, i), l = r.unit * s, c = a.unit * s, u = r.unit * i, h = a.unit * i;
+  const { gap: s = 0.2, padding: i = 0.4 } = e, r = W(S(e.cols), o.w, s, i), a = W(S(e.rows), o.h, s, i), l = r.unit * s, c = a.unit * s, h = r.unit * i, u = a.unit * i;
   for (const f of t) {
     const [m, b, x = 1, E = 1] = f.cell, p = {
-      x: o.x + u + r.before[m] + m * l,
-      y: o.y + h + a.before[b] + b * c,
+      x: o.x + h + r.before[m] + m * l,
+      y: o.y + u + a.before[b] + b * c,
       w: z(r.sizes.slice(m, m + x)) + (x - 1) * l,
       h: z(a.sizes.slice(b, b + E)) + (E - 1) * c
     };
@@ -84,10 +84,10 @@ function Oe(t, e) {
     for (const c of t[l].delta)
       switch (c.kind) {
         case "solidify":
-          for (const u of c.ids) o.add(u);
+          for (const h of c.ids) o.add(h);
           break;
         case "draw":
-          for (const [u, h] of c.edges) n.add(M(u, h));
+          for (const [h, u] of c.edges) n.add(M(h, u));
           break;
         case "annotate":
           s.set(c.id, c.value);
@@ -150,13 +150,13 @@ function _t(t, e) {
       return;
     }
     const a = Ye(r), l = He(r);
-    n.beats.forEach((c, u) => {
-      for (const h of c.delta) {
-        for (const g of Xe(h))
-          a.has(g) || o.push(`${i} beat ${u}: ${h.kind} id "${g}" is not a node in scene "${n.scene}"`);
-        if (h.kind === "draw")
-          for (const [g, f] of h.edges)
-            l.has(M(g, f)) || o.push(`${i} beat ${u}: draw ${g}->${f} has no matching edge in scene "${n.scene}"`);
+    n.beats.forEach((c, h) => {
+      for (const u of c.delta) {
+        for (const g of Xe(u))
+          a.has(g) || o.push(`${i} beat ${h}: ${u.kind} id "${g}" is not a node in scene "${n.scene}"`);
+        if (u.kind === "draw")
+          for (const [g, f] of u.edges)
+            l.has(M(g, f)) || o.push(`${i} beat ${h}: draw ${g}->${f} has no matching edge in scene "${n.scene}"`);
       }
     });
   }), o;
@@ -210,8 +210,8 @@ function je(t, e, o) {
 }
 function Ve(t, e, o, n) {
   if (n === "term") {
-    const c = Math.max(1, t.replace(/\s+/g, " ").trim().length), u = Math.max(e - 4, 6) / (c * 0.72), h = Math.max(o - 4, 6) / 1.2;
-    return Math.max(4, Math.min(u, h, 22));
+    const c = Math.max(1, t.replace(/\s+/g, " ").trim().length), h = Math.max(e - 4, 6) / (c * 0.72), u = Math.max(o - 4, 6) / 1.2;
+    return Math.max(4, Math.min(h, u, 22));
   }
   const s = t.split(/\s+/).filter(Boolean), i = Math.max(1, ...s.map((c) => c.length)), r = Math.max(e - 20, 8) / (i * 0.72), a = s.length > 1 ? 2 : 1, l = Math.max(o - 18, 8) / (a * 1.25);
   return Math.max(7, Math.min(r, l, 22));
@@ -228,7 +228,7 @@ function H({ data: t }) {
   const e = t;
   if (e.kind === "group")
     return /* @__PURE__ */ d("div", { className: "scene-node scene-node--group", style: { width: e.width, height: e.height } });
-  const o = e.ghosted ? " scene-node--ghost" : "", n = e.direction === "horizontal", s = e.kind === "container", i = e.kind === "symbol" && !!e.mono, r = e.kind === "symbol" || s ? We(e.icon) : void 0, a = Math.max(18, Math.min(Math.min(e.width, e.height) * 0.4, 48)), l = !!((r || i) && e.iconInline), c = e.kind === "term" && !!e.type, u = l ? Math.max(24, e.width - a - 12) : c ? Math.max(24, e.width * 0.6) : e.width, h = s ? qe(e.label, e.width) : Ve(e.label, u, e.height, e.kind);
+  const o = e.ghosted ? " scene-node--ghost" : "", n = e.direction === "horizontal", s = e.kind === "container", i = e.kind === "symbol" && !!e.mono, r = e.kind === "symbol" || s ? We(e.icon) : void 0, a = Math.max(18, Math.min(Math.min(e.width, e.height) * 0.4, 48)), l = !!((r || i) && e.iconInline), c = e.kind === "term" && !!e.type, h = l ? Math.max(24, e.width - a - 12) : c ? Math.max(24, e.width * 0.6) : e.width, u = s ? qe(e.label, e.width) : Ve(e.label, h, e.height, e.kind);
   return /* @__PURE__ */ y(
     "div",
     {
@@ -236,15 +236,15 @@ function H({ data: t }) {
       style: { width: e.width, height: e.height, "--node-color": e.color },
       children: [
         /* @__PURE__ */ d(B, { type: "target", position: n ? w.Left : w.Top, className: "scene-handle", isConnectable: !1 }),
-        s ? /* @__PURE__ */ y("span", { className: "scene-node__title", style: { fontSize: h }, children: [
-          r && /* @__PURE__ */ d(r, { className: "scene-node__title-icon", size: Math.round(h * 1.25), strokeWidth: 1.75 }),
+        s ? /* @__PURE__ */ y("span", { className: "scene-node__title", style: { fontSize: u }, children: [
+          r && /* @__PURE__ */ d(r, { className: "scene-node__title-icon", size: Math.round(u * 1.25), strokeWidth: 1.75 }),
           e.label
         ] }) : /* @__PURE__ */ y(F, { children: [
           i ? /* @__PURE__ */ d("span", { className: "scene-node__mono", style: { width: a, height: a, fontSize: a * 0.42 }, children: r ? /* @__PURE__ */ d(r, { size: a * 0.6, strokeWidth: 2 }) : Je(e.label) }) : r && /* @__PURE__ */ d(r, { className: "scene-node__icon", size: a, strokeWidth: 1.75 }),
           c ? /* @__PURE__ */ y("span", { className: "scene-node__row", children: [
-            /* @__PURE__ */ d("span", { className: "scene-node__label", style: { fontSize: h }, children: e.label }),
-            /* @__PURE__ */ d("span", { className: "scene-node__type", style: { fontSize: h * 0.82 }, children: e.type })
-          ] }) : /* @__PURE__ */ d("span", { className: "scene-node__label", style: { fontSize: h }, children: e.label }),
+            /* @__PURE__ */ d("span", { className: "scene-node__label", style: { fontSize: u }, children: e.label }),
+            /* @__PURE__ */ d("span", { className: "scene-node__type", style: { fontSize: u * 0.82 }, children: e.type })
+          ] }) : /* @__PURE__ */ d("span", { className: "scene-node__label", style: { fontSize: u }, children: e.label }),
           e.sub && /* @__PURE__ */ d("span", { className: "scene-node__sub", children: e.sub })
         ] }),
         /* @__PURE__ */ d(B, { type: "source", position: n ? w.Right : w.Bottom, className: "scene-handle", isConnectable: !1 })
@@ -255,8 +255,8 @@ function H({ data: t }) {
 H.defaultColor = G;
 const Qe = 16, et = 8, tt = 16, nt = (t) => Math.max(et, Math.min(tt, Qe * t));
 function I(t, e) {
-  const o = (t.measured.width ?? 0) / 2, n = (t.measured.height ?? 0) / 2, s = t.internals.positionAbsolute.x + o, i = t.internals.positionAbsolute.y + n, r = e.internals.positionAbsolute.x + (e.measured.width ?? 0) / 2, a = e.internals.positionAbsolute.y + (e.measured.height ?? 0) / 2, l = (r - s) / (2 * o) - (a - i) / (2 * n), c = (r - s) / (2 * o) + (a - i) / (2 * n), u = 1 / (Math.abs(l) + Math.abs(c) || 1);
-  return { x: o * (u * l + u * c) + s, y: n * (-u * l + u * c) + i };
+  const o = (t.measured.width ?? 0) / 2, n = (t.measured.height ?? 0) / 2, s = t.internals.positionAbsolute.x + o, i = t.internals.positionAbsolute.y + n, r = e.internals.positionAbsolute.x + (e.measured.width ?? 0) / 2, a = e.internals.positionAbsolute.y + (e.measured.height ?? 0) / 2, l = (r - s) / (2 * o) - (a - i) / (2 * n), c = (r - s) / (2 * o) + (a - i) / (2 * n), h = 1 / (Math.abs(l) + Math.abs(c) || 1);
+  return { x: o * (h * l + h * c) + s, y: n * (-h * l + h * c) + i };
 }
 function D(t, e) {
   const o = t.internals.positionAbsolute.x, n = t.internals.positionAbsolute.y, s = t.measured.width ?? 0;
@@ -265,7 +265,7 @@ function D(t, e) {
 function ot({ id: t, source: e, target: o, data: n, markerEnd: s }) {
   const i = T(e), r = T(o), a = Le((A) => A.transform[2]);
   if (!(i != null && i.measured.width) || !(r != null && r.measured.width)) return null;
-  const l = I(i, r), c = I(r, i), u = D(i, l), h = D(r, c), g = { sourceX: l.x, sourceY: l.y, targetX: c.x, targetY: c.y, sourcePosition: u, targetPosition: h }, [f, m, b] = u === h ? ze({ ...g, borderRadius: 14, offset: 24 }) : Ce(g), x = (n == null ? void 0 : n.color) ?? L, E = n == null ? void 0 : n.label, p = (n == null ? void 0 : n.ghosted) === !0, k = (n == null ? void 0 : n.animated) !== !1 && !p;
+  const l = I(i, r), c = I(r, i), h = D(i, l), u = D(r, c), g = { sourceX: l.x, sourceY: l.y, targetX: c.x, targetY: c.y, sourcePosition: h, targetPosition: u }, [f, m, b] = h === u ? ze({ ...g, borderRadius: 14, offset: 24 }) : Ce(g), x = (n == null ? void 0 : n.color) ?? L, E = n == null ? void 0 : n.label, p = (n == null ? void 0 : n.ghosted) === !0, k = (n == null ? void 0 : n.animated) !== !1 && !p;
   return /* @__PURE__ */ y(F, { children: [
     /* @__PURE__ */ d(
       Re,
@@ -363,8 +363,8 @@ function Mt({ course: t, getScene: e, audioBase: o }) {
   const n = dt(), s = t.sections, [i, r] = R({ section: 0, beat: 0 }), a = s[i.section], l = a ? e(a.scene) : void 0, c = N(
     () => a ? Ke(s, i) : null,
     [s, i, a]
-  ), u = a ? `${o}/audio/${a.id}-${i.beat}.wav` : void 0, { toggle: h, stop: g } = rt(
-    u,
+  ), h = a ? `${o}/${a.id}-${i.beat}.wav` : void 0, { toggle: u, stop: g } = rt(
+    h,
     () => r((f) => {
       const m = v(s, f, 1);
       return m.section === f.section && m.beat === f.beat && g(), m;
@@ -372,7 +372,7 @@ function Mt({ course: t, getScene: e, audioBase: o }) {
   );
   return O(() => {
     const f = (m) => {
-      s.length && (m.key === "ArrowRight" ? r((b) => v(s, b, 1)) : m.key === "ArrowLeft" ? r((b) => v(s, b, -1)) : m.key === " " && (m.preventDefault(), h()));
+      s.length && (m.key === "ArrowRight" ? r((b) => v(s, b, 1)) : m.key === "ArrowLeft" ? r((b) => v(s, b, -1)) : m.key === " " && (m.preventDefault(), u()));
     };
     return window.addEventListener("keydown", f), () => window.removeEventListener("keydown", f);
   }), a ? /* @__PURE__ */ d("div", { className: "rp-root", children: /* @__PURE__ */ d("div", { style: { width: _ * n, height: C * n }, children: /* @__PURE__ */ y(

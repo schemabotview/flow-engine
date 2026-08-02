@@ -23,8 +23,14 @@ export declare const container: (meta: {
     color?: string;
 }, inner: PatternResult) => SceneNodeSpec;
 
+/**
+ * One course = an ordered list of sections. A concept can have several courses (the
+ * concept app holds a registry of them); `id` routes to it (#/<id>) and names its audio
+ * directory, `title` shows in the index.
+ */
 export declare interface Course {
-    concept: string;
+    id: string;
+    title: string;
     sections: Section[];
 }
 
@@ -122,8 +128,9 @@ export declare function RevealPlayer({ course, getScene, audioBase }: RevealPlay
 export declare interface RevealPlayerProps {
     course: Course;
     getScene: (id: string) => SceneSpec | undefined;
-    /** Base URL for audio; clips resolve as `${audioBase}/audio/<section-id>-<beat>.wav`.
-     *  Use '' for same-origin (a concept app serving its own public/audio). */
+    /** Directory holding this course's clips; a clip resolves as
+     *  `${audioBase}/<section-id>-<beatIndex>.wav`. A concept app typically passes
+     *  `${import.meta.env.BASE_URL}audio/<courseId>` (per-course audio folder). */
     audioBase: string;
 }
 

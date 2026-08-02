@@ -29,7 +29,13 @@ export interface Section {
   highlight?: string[]
 }
 
+/**
+ * One course = an ordered list of sections. A concept can have several courses (the
+ * concept app holds a registry of them); `id` routes to it (#/<id>) and names its audio
+ * directory, `title` shows in the index.
+ */
 export interface Course {
-  concept: string
+  id: string
+  title: string
   sections: Section[]
 }

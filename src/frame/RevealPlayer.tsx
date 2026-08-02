@@ -35,8 +35,9 @@ function useFitScale() {
 export interface RevealPlayerProps {
   course: Course
   getScene: (id: string) => SceneSpec | undefined
-  /** Base URL for audio; clips resolve as `${audioBase}/audio/<section-id>-<beat>.wav`.
-   *  Use '' for same-origin (a concept app serving its own public/audio). */
+  /** Directory holding this course's clips; a clip resolves as
+   *  `${audioBase}/<section-id>-<beatIndex>.wav`. A concept app typically passes
+   *  `${import.meta.env.BASE_URL}audio/<courseId>` (per-course audio folder). */
   audioBase: string
 }
 
@@ -54,8 +55,8 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
     [sections, pos, section],
   )
 
-  // Per-beat narration by convention: `<audioBase>/audio/<section-id>-<beatIndex>.wav`.
-  const audioUrl = section ? `${audioBase}/audio/${section.id}-${pos.beat}.wav` : undefined
+  // Per-beat narration by convention: `<audioBase>/<section-id>-<beatIndex>.wav`.
+  const audioUrl = section ? `${audioBase}/${section.id}-${pos.beat}.wav` : undefined
   const { toggle, stop } = useNarration(audioUrl, () =>
     setPos((p) => {
       const next = step(sections, p, 1)
