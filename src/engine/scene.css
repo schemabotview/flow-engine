@@ -32,7 +32,7 @@
 
 /* --- Node base ------------------------------------------------------------- */
 .scene-node {
-  --base: #1f1f1f; /* mix seed — a touch lighter than the scene bg */
+  --base: #22262e; /* mix seed — Zed-slate, a touch lighter than the scene bg */
   --fill: color-mix(in srgb, var(--node-color) 30%, var(--base));
   --line: color-mix(in srgb, var(--node-color) 45%, var(--base));
   box-sizing: border-box;
@@ -47,8 +47,8 @@
 }
 
 .scene-node__label {
-  font-weight: 700;
-  color: #f4f6fb;
+  font-weight: 600;
+  color: #eceef2;
   padding: 0 6px;
   max-width: 100%;
   overflow-wrap: normal;
@@ -59,6 +59,8 @@
   margin-top: 4px;
   font-size: 0.72em;
   font-weight: 500;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.01em;
   color: color-mix(in srgb, var(--node-color) 60%, #ffffff 40%);
 }
 .scene-node__icon {
@@ -114,7 +116,7 @@
   border: 1px solid var(--line);
 }
 .scene-node--term .scene-node__label {
-  font-weight: 400;
+  font-weight: 600;
   color: #f1f2f4;
   padding: 0 2px;
   white-space: nowrap;
@@ -141,6 +143,7 @@
   flex: none;
   font-weight: 500;
   white-space: nowrap;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
   color: color-mix(in srgb, var(--node-color) 52%, #cfd4de 48%);
@@ -165,9 +168,10 @@
   padding: 0 4px;
   background: color-mix(in srgb, var(--node-color) 12%, var(--base));
   color: color-mix(in srgb, var(--node-color) 75%, #cfd4dc);
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
   white-space: nowrap;
   max-width: calc(100% - 12px);
   overflow: hidden;
@@ -200,20 +204,20 @@
 .scene-node--ghost .scene-node__label,
 .scene-node--ghost .scene-node__title,
 .scene-node--ghost .scene-node__type {
-  color: #5b6473;
+  color: #727a88;
   font-weight: 500;
 }
 /* Ghost also mutes the icon glyph and the mono badge so the skeleton stays monochrome. */
 .scene-node--ghost .scene-node__icon,
 .scene-node--ghost .scene-node__title-icon {
-  color: #4c5563;
+  color: #626b7a;
 }
 .scene-node--ghost .scene-node__mono {
-  background: #3a4150;
+  background: #434b5a;
   color: #12151b;
 }
 .scene-node--ghost .scene-node__sub {
-  color: #4c5563;
+  color: #626b7a;
 }
 
 /* --- focus states (pre-wired for the reveal slices) ----------------------- */
@@ -230,19 +234,23 @@
   opacity: 0.55;
 }
 
-/* --- edge label ----------------------------------------------------------- */
+/* --- edge label -----------------------------------------------------------
+   Layer labels ABOVE the wires (z 3) and container fills (z 0/1) so they read,
+   but BELOW the leaf node boxes (z 10, set in sceneGraph) so a label tucks
+   behind a node it crosses instead of stamping on top of it. */
 .react-flow__edgelabel-renderer {
-  z-index: 6;
+  z-index: 4;
 }
+/* A small chip riding the wire: a translucent dark pill masks whatever node/container it
+   lands over, so the label reads as belonging to the edge — not stamped on a node. */
 .scene-edge-label {
   position: absolute;
-  color: #eef0f5;
+  color: #a8aeba;
   font-weight: 600;
   white-space: nowrap;
   pointer-events: none;
-  text-shadow:
-    0 0 3px #14161b,
-    0 0 3px #14161b,
-    0 0 6px #14161b,
-    0 1px 2px rgba(0, 0, 0, 0.85);
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: rgba(22, 25, 30, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }

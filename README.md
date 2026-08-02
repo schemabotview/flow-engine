@@ -56,4 +56,7 @@ npm run build     # Vite lib → dist/ (flow-engine.js + flow-engine.css + index
 
 **After changing `src/`, rebuild and commit `dist/`** — consumers install the committed build.
 
-See `CLAUDE.md` for the architecture, the locked design principles, and what's deferred.
+The **theme** (Zed-slate palette + Plex typography, tuned for YouTube capture) lives in
+`src/engine/scene.css` + `src/frame/player.css`; the consuming app self-hosts the Plex fonts. See
+`CLAUDE.md` ("Theme & typography") for the palette, label sizing, and the behind-nodes edge-label
+layering — and for the architecture, locked design principles, and what's deferred.

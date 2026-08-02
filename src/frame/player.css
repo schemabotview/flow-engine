@@ -7,22 +7,23 @@
   place-items: center;
   height: 100%;
   width: 100%;
-  background: #000;
+  background: #1e2127; /* Zed-slate letterbox surround */
 }
 .rp-stage {
   position: relative;
   display: flex;
   overflow: hidden;
-  background: #0f1115; /* the scene canvas */
+  background: #282c34; /* the scene canvas — Zed-slate */
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
 .rp-scene-pane {
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.09);
 }
 .rp-slide-pane {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background: #2f333d; /* slide surface — lifted off the scene canvas for figure-ground */
 }
 
 /* Default slide renderer (SlidePane) — title + a Markdown body (react-markdown + GFM).
@@ -39,10 +40,10 @@
   font-size: 42px;
   font-weight: 700;
   line-height: 1.15;
-  color: rgba(255, 255, 255, 0.92);
+  color: #eceef2; /* video-grade high contrast on the lifted slate surface */
 }
 .slide__body {
-  color: rgba(255, 255, 255, 0.72);
+  color: #c8cdd6;
   font-size: 24px;
   line-height: 1.4;
 }
@@ -110,7 +111,7 @@
   color: rgba(255, 255, 255, 0.85);
 }
 .slide__body code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.9em;
   padding: 2px 7px;
   border-radius: 5px;

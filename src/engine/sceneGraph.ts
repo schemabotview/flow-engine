@@ -44,12 +44,18 @@ export function toFlowNodes(
     const box = boxes[n.id]
     const revealed = nodes ? nodes.has(n.id) : true
     const inFocus = hasFocus ? focus!.has(n.id) : true
+    // Leaf boxes (symbol/term) ride above the edge-label layer (z 4, scene.css) so a wire
+    // label tucks BEHIND the node it crosses; containers/groups stay on their default low z
+    // so labels read over their background. See scene.css .react-flow__edgelabel-renderer.
+    const kind = n.kind ?? 'symbol'
+    const isLeaf = kind === 'symbol' || kind === 'term'
     return {
       id: n.id,
       type: 'scene',
       position: { x: box.x, y: box.y },
       draggable: false,
       selectable: false,
+      zIndex: isLeaf ? 10 : undefined,
       data: {
         label: n.label,
         sub: n.sub,

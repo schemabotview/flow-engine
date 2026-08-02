@@ -69,9 +69,14 @@ export function SceneNode({ data }: NodeProps) {
     : rowType
       ? Math.max(24, d.width * 0.6)
       : d.width
+  // Vertical room the label must leave for the STACKED icon and the sub-label, so a
+  // node with icon + label + sub fits its box. An inline icon/badge sits beside the
+  // label (no vertical cost); a stacked icon or mono badge costs its height + margin.
+  const iconReserveV = inlineIcon ? 0 : mono ? iconSize + 4 : Icon ? iconSize + 5 : 0
+  const subReserveV = d.sub ? 16 : 0
   const font = isContainer
     ? fitTitlePx(d.label, d.width)
-    : fitLabelPx(d.label, labelWidth, d.height, d.kind)
+    : fitLabelPx(d.label, labelWidth, d.height, d.kind, iconReserveV + subReserveV)
 
   return (
     <div

@@ -64,6 +64,30 @@ import 'flow-engine/styles.css'
 - **Narration** (`useNarration`): one `<audio>`; a beat fires when its clip starts, clip length is
   the timing (no timestamps); clip-end auto-advances the beat.
 
+## Theme & typography (implements the canonical palette in `../CLAUDE.md`)
+
+The Zed-slate palette lives in `engine/scene.css` (diagram) + `frame/player.css` (stage/slide).
+Fonts are the *consumer's* responsibility (the concept app self-hosts Plex and sets `body`
+font-family); the engine only references the family names (`'IBM Plex Mono'` for code/sub/type/
+container-title; node labels + slide inherit the app's Plex Sans).
+
+Scene typography (calm, uniform — `engine/scene.css` + `engine/fitFont.ts`):
+- Node labels: **weight 600** (symbol *and* term unified — no 400/700 split), auto-fit **capped 18px**.
+- `fitLabelPx(label, w, h, kind, reserveV)` — `SceneNode` passes `reserveV` = the stacked icon's
+  height + the sub-label footprint, so **icon + label + sub fits its box** (don't drop this — a flat
+  reserve overflows short boxes).
+- Sub-labels, ERD types, container titles → **Plex Mono**.
+- Edge labels: **13px** (`FlowEdge` `LABEL_BASE`/`MAX`) — clearly secondary to node labels.
+
+**Edge-label layering (behind nodes).** React Flow (basic zIndexMode) assigns: container z `0/1`,
+child nodes `+1`, etc.; `.react-flow__nodes` is *not* a stacking context, so each node's inline
+z-index competes directly in the viewport context. We layer: container fills `0/1` → **wires z 3**
+(`.react-flow__edges`) → **edge labels z 4** (`.react-flow__edgelabel-renderer`) → **leaf node boxes
+z 10** (`sceneGraph.toFlowNodes` sets `zIndex: 10` on symbol/term). Net: a wire label reads over the
+container background + wire but **tucks behind any leaf box it crosses** (no pill/stamp-on-node). A
+label on a crowded/short edge will therefore be mostly hidden — that's a *scene-authoring* signal
+(space the nodes or omit the label), not an engine bug.
+
 ## Build & release
 
 ```bash

@@ -187,13 +187,14 @@ function wr(e) {
 function Hl(e, n, t, r, i) {
   const o = !!i && i.size > 0;
   return wr(e.nodes).map((l) => {
-    const a = n[l.id], s = r ? r.has(l.id) : !0, u = o ? i.has(l.id) : !0;
+    const a = n[l.id], s = r ? r.has(l.id) : !0, u = o ? i.has(l.id) : !0, f = l.kind ?? "symbol", c = f === "symbol" || f === "term";
     return {
       id: l.id,
       type: "scene",
       position: { x: a.x, y: a.y },
       draggable: !1,
       selectable: !1,
+      zIndex: c ? 10 : void 0,
       data: {
         label: l.label,
         sub: l.sub,
@@ -227,13 +228,13 @@ function Ul(e, n, t, r) {
     };
   });
 }
-function ql(e, n, t, r) {
+function ql(e, n, t, r, i = 0) {
   if (r === "term") {
-    const u = Math.max(1, e.replace(/\s+/g, " ").trim().length), f = Math.max(n - 4, 6) / (u * 0.72), c = Math.max(t - 4, 6) / 1.2;
-    return Math.max(4, Math.min(f, c, 22));
+    const f = Math.max(1, e.replace(/\s+/g, " ").trim().length), c = Math.max(n - 4, 6) / (f * 0.72), p = Math.max(t - i - 4, 6) / 1.2;
+    return Math.max(4, Math.min(c, p, 18));
   }
-  const i = e.split(/\s+/).filter(Boolean), o = Math.max(1, ...i.map((u) => u.length)), l = Math.max(n - 20, 8) / (o * 0.72), a = i.length > 1 ? 2 : 1, s = Math.max(t - 18, 8) / (a * 1.25);
-  return Math.max(7, Math.min(l, s, 22));
+  const o = e.split(/\s+/).filter(Boolean), l = Math.max(1, ...o.map((f) => f.length)), a = Math.max(n - 20, 8) / (l * 0.72), s = o.length > 1 ? 2 : 1, u = Math.max(t - i - 8, 8) / (s * 1.25);
+  return Math.max(7, Math.min(a, u, 18));
 }
 function Vl(e, n) {
   const r = Math.max(n - 8, 6) / (Math.max(e.length, 1) * 0.86);
@@ -247,7 +248,7 @@ function Sr({ data: e }) {
   const n = e;
   if (n.kind === "group")
     return /* @__PURE__ */ U("div", { className: "scene-node scene-node--group", style: { width: n.width, height: n.height } });
-  const t = n.ghosted ? " scene-node--ghost" : n.highlighted ? " scene-node--lit" : n.dimmed ? " scene-node--dimmed" : "", r = n.direction === "horizontal", i = n.kind === "container", o = n.kind === "symbol" && !!n.mono, l = n.kind === "symbol" || i ? zl(n.icon) : void 0, a = Math.max(18, Math.min(Math.min(n.width, n.height) * 0.4, 48)), s = !!((l || o) && n.iconInline), u = n.kind === "term" && !!n.type, f = s ? Math.max(24, n.width - a - 12) : u ? Math.max(24, n.width * 0.6) : n.width, c = i ? Vl(n.label, n.width) : ql(n.label, f, n.height, n.kind);
+  const t = n.ghosted ? " scene-node--ghost" : n.highlighted ? " scene-node--lit" : n.dimmed ? " scene-node--dimmed" : "", r = n.direction === "horizontal", i = n.kind === "container", o = n.kind === "symbol" && !!n.mono, l = n.kind === "symbol" || i ? zl(n.icon) : void 0, a = Math.max(18, Math.min(Math.min(n.width, n.height) * 0.4, 48)), s = !!((l || o) && n.iconInline), u = n.kind === "term" && !!n.type, f = s ? Math.max(24, n.width - a - 12) : u ? Math.max(24, n.width * 0.6) : n.width, c = s ? 0 : o ? a + 4 : l ? a + 5 : 0, p = n.sub ? 16 : 0, h = i ? Vl(n.label, n.width) : ql(n.label, f, n.height, n.kind, c + p);
   return /* @__PURE__ */ be(
     "div",
     {
@@ -255,15 +256,15 @@ function Sr({ data: e }) {
       style: { width: n.width, height: n.height, "--node-color": n.color },
       children: [
         /* @__PURE__ */ U(Et, { type: "target", position: r ? we.Left : we.Top, className: "scene-handle", isConnectable: !1 }),
-        i ? /* @__PURE__ */ be("span", { className: "scene-node__title", style: { fontSize: c }, children: [
-          l && /* @__PURE__ */ U(l, { className: "scene-node__title-icon", size: Math.round(c * 1.25), strokeWidth: 1.75 }),
+        i ? /* @__PURE__ */ be("span", { className: "scene-node__title", style: { fontSize: h }, children: [
+          l && /* @__PURE__ */ U(l, { className: "scene-node__title-icon", size: Math.round(h * 1.25), strokeWidth: 1.75 }),
           n.label
         ] }) : /* @__PURE__ */ be(Zn, { children: [
           o ? /* @__PURE__ */ U("span", { className: "scene-node__mono", style: { width: a, height: a, fontSize: a * 0.42 }, children: l ? /* @__PURE__ */ U(l, { size: a * 0.6, strokeWidth: 2 }) : Wl(n.label) }) : l && /* @__PURE__ */ U(l, { className: "scene-node__icon", size: a, strokeWidth: 1.75 }),
           u ? /* @__PURE__ */ be("span", { className: "scene-node__row", children: [
-            /* @__PURE__ */ U("span", { className: "scene-node__label", style: { fontSize: c }, children: n.label }),
-            /* @__PURE__ */ U("span", { className: "scene-node__type", style: { fontSize: c * 0.82 }, children: n.type })
-          ] }) : /* @__PURE__ */ U("span", { className: "scene-node__label", style: { fontSize: c }, children: n.label }),
+            /* @__PURE__ */ U("span", { className: "scene-node__label", style: { fontSize: h }, children: n.label }),
+            /* @__PURE__ */ U("span", { className: "scene-node__type", style: { fontSize: h * 0.82 }, children: n.type })
+          ] }) : /* @__PURE__ */ U("span", { className: "scene-node__label", style: { fontSize: h }, children: n.label }),
           n.sub && /* @__PURE__ */ U("span", { className: "scene-node__sub", children: n.sub })
         ] }),
         /* @__PURE__ */ U(Et, { type: "source", position: r ? we.Right : we.Bottom, className: "scene-handle", isConnectable: !1 })
@@ -272,7 +273,7 @@ function Sr({ data: e }) {
   );
 }
 Sr.defaultColor = xr;
-const Yl = 16, Xl = 8, Gl = 16, Ql = (e) => Math.max(Xl, Math.min(Gl, Yl * e));
+const Yl = 13, Xl = 8, Gl = 13, Ql = (e) => Math.max(Xl, Math.min(Gl, Yl * e));
 function Tt(e, n) {
   const t = (e.measured.width ?? 0) / 2, r = (e.measured.height ?? 0) / 2, i = e.internals.positionAbsolute.x + t, o = e.internals.positionAbsolute.y + r, l = n.internals.positionAbsolute.x + (n.measured.width ?? 0) / 2, a = n.internals.positionAbsolute.y + (n.measured.height ?? 0) / 2, s = (l - i) / (2 * t) - (a - o) / (2 * r), u = (l - i) / (2 * t) + (a - o) / (2 * r), f = 1 / (Math.abs(s) + Math.abs(u) || 1);
   return { x: t * (f * s + f * u) + i, y: r * (-f * s + f * u) + o };

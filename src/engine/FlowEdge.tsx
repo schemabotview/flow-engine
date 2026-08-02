@@ -15,9 +15,9 @@ import { EDGE } from './colors.ts'
 // Edge labels ride the EdgeLabelRenderer, which only TRANSLATES its layer. A fixed-px
 // label overpowers the graph when zoomed out, so scale the font with the live camera
 // zoom and CLAMP it: proportional to the map, never smaller than legible nor too large.
-const LABEL_BASE = 16
+const LABEL_BASE = 13
 const LABEL_MIN = 8
-const LABEL_MAX = 16
+const LABEL_MAX = 13
 const labelPx = (zoom: number) => Math.max(LABEL_MIN, Math.min(LABEL_MAX, LABEL_BASE * zoom))
 
 // Floating-edge geometry: connect at the point on each node's border that faces the
