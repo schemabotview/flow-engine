@@ -26,6 +26,8 @@ export type { Position } from './content/nav.ts'
 export { validateCourse, sceneNodeIds } from './content/validate.ts'
 
 // --- Components ---
+export { RevealPlayer } from './frame/RevealPlayer.tsx'
+export type { RevealPlayerProps } from './frame/RevealPlayer.tsx'
 export { SceneViewer } from './engine/SceneViewer.tsx'
 export { SlidePane } from './frame/SlidePane.tsx'
 
