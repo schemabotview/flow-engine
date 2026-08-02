@@ -1,0 +1,60 @@
+/* Player chrome — plain CSS so the engine is self-contained (no Tailwind dependency on
+   the consuming app). The stage is a fixed 1920×1080 surface RevealPlayer scales to fit;
+   pane widths and the scale transform are set inline. */
+
+.rp-root {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  width: 100%;
+  background: #000;
+}
+.rp-stage {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  background: #0f1115; /* the scene canvas */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+.rp-scene-pane {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+.rp-slide-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Default slide renderer (SlidePane) */
+.slide {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 0 64px;
+}
+.slide__title {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: rgba(255, 255, 255, 0.9);
+}
+.slide__list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.slide__item {
+  display: flex;
+  gap: 12px;
+  font-size: 24px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.7);
+}
+.slide__bullet {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.25);
+}

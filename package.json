@@ -1,0 +1,38 @@
+{
+  "name": "flow-engine",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "GraphL progressive-reveal engine — assembles flow/pattern diagrams beat-by-beat in sync with narration.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/flow-engine.js"
+    },
+    "./styles.css": "./dist/flow-engine.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "peerDependencies": {
+    "@xyflow/react": ">=12",
+    "lucide-react": ">=1",
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@xyflow/react": "^12.11.2",
+    "lucide-react": "^1.28.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.5",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}

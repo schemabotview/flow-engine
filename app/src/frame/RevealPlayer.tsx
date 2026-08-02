@@ -5,6 +5,7 @@ import { useNarration } from '../hooks/useNarration.ts'
 import { SlidePane } from './SlidePane.tsx'
 import type { Course } from '../content/types.ts'
 import { revealForPosition, step, type Position } from '../content/nav.ts'
+import './player.css'
 
 // The reusable player: given a Course + a scene resolver + a base URL for audio, it owns
 // the whole playback surface — the fixed 1920×1080 two-pane stage, the (section, beat)
@@ -81,12 +82,12 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
   if (!section) return null
 
   return (
-    <div className="grid h-full w-full place-items-center bg-black">
+    <div className="rp-root">
       {/* Sizer occupies the SCALED footprint so the stage centers cleanly; the stage
           itself scales from its top-left corner to fill it. */}
       <div style={{ width: STAGE_W * scale, height: STAGE_H * scale }}>
         <div
-          className="relative flex overflow-hidden bg-scene shadow-2xl"
+          className="rp-stage"
           style={{
             width: STAGE_W,
             height: STAGE_H,
@@ -94,11 +95,11 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
             transformOrigin: 'top left',
           }}
         >
-          <div style={{ width: SCENE_W }} className="border-r border-white/10">
+          <div className="rp-scene-pane" style={{ width: SCENE_W }}>
             {scene && <SceneViewer scene={scene} reveal={reveal} />}
           </div>
           {/* Right pane: the section's static slide (the capture frame — no dev chrome). */}
-          <div style={{ width: SLIDE_W }} className="flex flex-col justify-center">
+          <div className="rp-slide-pane" style={{ width: SLIDE_W }}>
             <SlidePane slide={section.slide} />
           </div>
         </div>
