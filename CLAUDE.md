@@ -1,150 +1,90 @@
-# CLAUDE.md — graphl-flow (progressive-reveal design/spec)
+# CLAUDE.md — flow-engine (the shared reveal engine)
 
-This repo holds the **design and implementation notes** for GraphL's progressive-reveal layer: the
-system that turns a static left-pane scene into a flow/pattern diagram **assembled beat-by-beat** in
-sync with narration. It is a spec, not an app — the code lands in `graphl-render-app` (engine) and is
-consumed by `graphl-capture-app` (recording). Read `README.md` first for the one-page product framing;
-this file is the working context and the contract details for future sessions.
+The concept-agnostic **progressive-reveal engine** for GraphL: React + React Flow rendering, the
+reveal fold, per-beat narration, and a top-level `<RevealPlayer>`. It is a **library** — concept
+apps (`apache-spark`, …) install it via GitHub and supply their own scenes + course + audio. This
+repo contains **no concept content and no runnable app** (the concept apps are the previews).
 
-> Parent context: the umbrella `Workspace/CLAUDE.md` describes GraphL overall (concept → module →
-> section; the `md → (slide, tts, wav)` bundle; app-owned scenes; GitHub-only content wiring). This
-> file **extends** that model with reveal; it does not replace it.
+> Parent context: `../CLAUDE.md` (workspace overview + the domain model + locked principles).
 
----
+## Layout
 
-## Working agreement (inherited HARD RULE)
+```
+flow-engine/
+  package.json      name "flow-engine"; exports → dist; peerDeps; Vite lib build
+  vite.config.ts    Vite library mode + vite-plugin-dts (rollupTypes)
+  tsconfig.json
+  dist/             flow-engine.js + flow-engine.css + index.d.ts   ← COMMITTED
+  src/
+    index.ts        the PUBLIC API barrel (the only thing consumers import)
+    engine/         grid resolver, sceneGraph, SceneNode/FlowEdge/SceneViewer,
+                    reveal.ts (the fold), colors, fitFont, icons, patterns, scene.css
+    content/        types.ts (Course/Section/Slide), nav.ts (scene-run fold), validate.ts
+    frame/          RevealPlayer.tsx, SlidePane.tsx, player.css
+    hooks/          useNarration.ts
+```
 
-Same as the parent workspace: the owner drives, **one reviewed slice at a time**. Propose → approve →
-implement one small slice → stop for review → continue. Explain before writing. No silent scaffolding.
-One concept per slice.
+## Public API (src/index.ts)
 
----
+- **`<RevealPlayer course getScene audioBase />`** — the whole playback surface (stage, (section,
+  beat) cursor, reveal fold, narration, SPACE/←→ transport). A concept app mounts this.
+- **Authoring helpers**: `container` / `group` / `wgrid` (build nested scene grids), the color
+  constants (`BLUE`, `GREEN`, …), `getIcon`.
+- **Types**: `SceneSpec`, `SceneNodeSpec`, `Course`, `Section`, `Slide`, `Beat`, `RevealDelta`, …
+- **Logic**: `revealAt` (fold), `revealForPosition` / `step` (scene-run nav), `validateCourse`.
 
-## What this adds to the domain model
+Consume:
+```ts
+import { RevealPlayer, container, wgrid, BLUE, validateCourse, type Course } from 'flow-engine'
+import 'flow-engine/styles.css'
+```
 
-The existing bundle is `md` (source of truth) → `slide` (right pane) + `tts` (narration) + `wav`
-(audio). graphl-flow changes **one** of those and adds **one** validated reference:
+## How it renders (the core)
 
-- **`tts`/beats merge into a single ordered list** per section: `[(line, reveal-delta), …]`.
-  - **Map** section → list length **1** (the whole section is one beat).
-  - **Trace** section → list length **N** (one beat per program step).
-- **`wav` becomes per-beat clips** (natural for Chatterbox; one short clip per line).
-- **`slide`** and **`md`** are unchanged in role.
-- Scenes stay **app-owned TypeScript**, referenced by **raw id** — see the contract below.
+- **Ghost-and-solidify**: `SceneViewer` draws every scene element; `revealForPosition` returns the
+  set of solidified node/edge ids, everything else renders ghosted (faint). Not blur.
+- **Reveal = pure fold of the beat index** (`reveal.ts` `revealAt`): never mutated forward. Nav
+  (`nav.ts`) folds across a *scene run* (consecutive same-scene sections accumulate; a scene change
+  resets to fully ghosted). This purity is what makes capture-seek and reload truthful.
+- **Reveal verbs** (`RevealDelta`): `solidify` · `draw` (edge) · `pulse` · `annotate` · `pan`.
+  Additive only. `solidify`/`draw` render today; `pulse`/`annotate`/`pan` are folded but **not yet
+  drawn**.
+- **Narration** (`useNarration`): one `<audio>`; a beat fires when its clip starts, clip length is
+  the timing (no timestamps); clip-end auto-advances the beat.
 
-### The two scene archetypes (drives everything)
+## Build & release
 
-- **Map (Type A / structural)** — reveal per section, coarse. Nodes are components/layers. Dominant
-  verb `solidify`.
-- **Trace (Type B / execution)** — reveal per beat, fine, timed to narration. Nodes are runtime
-  entities (threads, RDDs, variables, stages). Needs `annotate` (state changing over time) — that's
-  the tell that a Trace scene is teaching something a static diagram can't.
+```bash
+npm run build     # Vite lib → dist/flow-engine.js + .css + index.d.ts
+```
 
-Reusable module rhythm: **Origin Map → Architecture Map → Syntax Trace → [hard concept] Trace.**
+- **`dist/` is committed.** GitHub install (`npm i github:schemabotview/flow-engine`) resolves the
+  committed `dist` via `exports` — no build-on-install. **After changing `src/`, rebuild and commit
+  `dist/`**, or consumers won't see the change.
+- Peers (`react`, `react-dom`, `@xyflow/react`, `lucide-react`) are externalized — the consumer
+  provides them.
+- **No Tailwind dependency**: the player chrome is plain CSS (`frame/player.css` + `engine/scene.css`)
+  bundled into `flow-engine.css`. Consumers import `'flow-engine/styles.css'`; nothing else needed.
 
----
+## Locked decisions (do not relitigate)
 
-## The content ↔ scene contract (decided)
+- Ghost-and-solidify, **not** blur. · Reveal is a **pure fold of the beat index**. · **Scene** is the
+  accumulation/reset boundary. · Beats reference **raw node ids** (validated, no reveal API). ·
+  `1 beat = 1 line + 1 delta`; timing from clip length. · **Authored** beats, not instrumented.
+- Engine consumed by **GitHub install** (not npm publish); `dist` committed.
+- Scenes live in **concept apps**, not the engine (scenes are per-concept structure).
 
-**Beats reference raw node ids** — consistent with how the manifest already wires `focus` and
-`highlight`. No separate "reveal API" / declared id set; a beat may name any element id in its scene.
+## Deferred
 
-Consequences to honor:
+- **`flow-engine/pure`**: a second, DOM-free entry exporting `validateCourse`/`revealAt`/nav/types/
+  authoring helpers (no `@xyflow/react`), so a concept app's CI can run a `node` build-gate on
+  beat-id drift. Today the bundle imports React Flow (DOM), so only dev-load validation runs.
+- Rendering of `pulse` / `annotate` / `pan`. `annotate` visual is an open question (badge? inline?).
+- Camera/focus model (per-section zoom push-in + focus-dim two-phase intro). Only whole-scene fitView.
+- Capture mode: `__captureReady` handshake + **preload + seek** off the pure fold (never drive
+  capture off the audio `ended` event — a failed live fetch would hang the recording).
 
-1. **The ghost model enumerates the id set for free.** Because ghost-and-solidify draws *every*
-   element from the start (dimmed), the scene already lists all its ids. The validator's "valid set"
-   *is* "the scene's nodes/edges/containers" — no separate list to maintain.
-2. **Beats are a second content→scene reference surface** (the first is manifest `scene`/`focus`/
-   `highlight`). Renaming a scene node can silently break content beats.
-3. **Ship a content-lint validator:** every beat id must exist in its scene's element set. Treat it
-   like a foreign-key check — fail loud at build/load, not silently at play time.
+## Working agreement (HARD RULE)
 
-Because beat-derivation must name real scene ids, **the AI pass that derives beats from the `md` needs
-the scene definition as an input**, not just the `md`. The `md` alone doesn't know a scene's node ids.
-
----
-
-## The reveal engine (implementation notes)
-
-### Ghost, then solidify — NOT blur
-Draw the full skeleton at low opacity (~0.15–0.2: dim outlines, dashed edges, empty containers). Each
-beat *fills in* its target (semantic color + full opacity + label). Blur was **evaluated and rejected**
-(mud under H.264, wasted bitrate on sharp/blurry gradients, reads as "ignore me" not "coming"). This
-also composes with the existing focus model already in render-app (brighten focused, dim rest ~0.28).
-
-### A beat is a narration line
-`1 beat = 1 narration line + 1 reveal delta`. Same segmentation for storyboard, tts, and reveal.
-- A beat fires when its **narration clip starts**; clip length *is* the timing. **No timestamp
-  anchors** — regenerated audio never drifts.
-- Reuse render-app's `useNarration` auto-advance: **beat→beat = the same "clip ended → next" logic as
-  section→section**, one level deeper. Map sections (length-1 list) behave exactly as today.
-
-### Reveal deltas (keep the verb set small + additive)
-`solidify` · `draw` (edge) · `pulse`/`highlight` · `annotate` (show a value on a node) · `pan` (camera).
-Reveal only *accumulates* within a scene — no un-reveal verbs.
-
-### Reveal state = pure function of beat index (CRITICAL)
-Never mutate reveal forward per tick. "What's revealed at beat *i*" = **fold deltas `[0 … i]`** from
-the scene's first beat. It's cheap (a handful of deltas) and makes all of these automatically correct
-because they're each just *"set i, recompute"*:
-- **← / → paging** (owner re-watches a beat)
-- **capture-mode seeking** (recorder teleports to a beat and needs a truthful frame)
-- **reload / deep-link** (landing mid-scene shows the right partial reveal)
-
-This is the single most load-bearing principle for capture; get it wrong and capture frames lie.
-
-### Scene = the reset/accumulation boundary
-Reveal builds up across the sections that share one scene. A **new scene enters fully ghosted** and
-builds fresh — a Trace scene is never polluted by a prior Map scene's revealed state. "One assembling
-pattern per scene."
-
----
-
-## Authoring model (decided)
-
-**Authored beats — a storyboard derived from the `md`** (not instrumented from a real program run).
-
-- Fits the existing `md → …` derivation pipeline: beats become another derivation, alongside slide
-  and tts, taking `md` + the scene definition as inputs.
-- Instrumented execution traces (actually running the code and capturing a real trace) are a **v2
-  dream**, explicitly out of scope for v1 — they only work for instrumentable programs and are a whole
-  separate tooling effort.
-
----
-
-## Suggested build order (Map first, cheap → Trace later, rich)
-
-1. **Map-scene reveal** — coarse per-section ghost-and-solidify. Covers every architecture/invention
-   section. Cheapest; reuses focus model + section auto-advance almost as-is.
-2. **Per-beat narration** — split a section's tts/wav into an ordered `(line, delta)` list; extend
-   `useNarration` to advance beats; make reveal a pure fold of the beat index.
-3. **Trace-scene reveal** — `annotate` and live state; the multithreading/streaming money shots.
-4. **Validator** — content-lint that every beat id exists in its scene.
-
-**Prototype gate before any code:** take **one real module** (e.g. a `ITC-bigdata` data-modeling
-module, or a Spark module) and **storyboard its beats by hand** — does the section/beat order produce
-a build sequence that *teaches*, or is the reveal arbitrary? If it feels forced by hand, the fix is in
-how content maps to the diagram, not in the engine.
-
----
-
-## Open items / decisions still to make
-
-- **Scene entry state:** does a scene enter with *everything* ghosted and beat 1 solidifies the entry
-  point, or is the entry node pre-solid? (Leaning: fully ghosted, beat 1 solidifies entry.)
-- **Beat-file format & location:** where the `(line, delta)` list physically lives in the content repo
-  and how it names its scene.
-- **`annotate` rendering:** how runtime values attach to a node visually (badge? inline label? side
-  panel?) without hurting legibility after video re-encoding.
-- **Validator home:** content-repo build step vs. render-app load-time check vs. both.
-
----
-
-## Decisions already locked (do not relitigate)
-
-- Ghost-and-solidify, **not** blur.
-- **Authored** beats (storyboard from `md`), not instrumented.
-- Beats reference **raw node ids**; a validator catches drift (no declared reveal-API).
-- Reveal state is a **pure fold of the beat index**, never mutated forward.
-- **Scene** is the reveal accumulation/reset boundary.
-- `1 beat = 1 narration line + 1 reveal delta`; timing comes from clip length, not timestamps.
+One reviewed slice at a time: propose → approve → implement → stop for review. Explain before writing.
+No silent scaffolding.
