@@ -61,11 +61,51 @@
   font-weight: 500;
   color: color-mix(in srgb, var(--node-color) 60%, #ffffff 40%);
 }
+.scene-node__icon {
+  color: var(--node-color);
+  margin-bottom: 5px;
+  flex-shrink: 0;
+}
 
 /* --- symbol: a filled role-colored block ---------------------------------- */
 .scene-node--symbol {
   background: var(--fill);
   border: 1px solid var(--line);
+}
+
+/* icon-left / label-right variant: for short-but-wide symbol boxes in tight stacks
+   where icon-over-label would overflow the box height. Spends width, not height. */
+.scene-node--iconh {
+  flex-direction: row;
+}
+.scene-node--iconh .scene-node__icon,
+.scene-node--iconh .scene-node__mono {
+  margin-bottom: 0;
+  margin-right: 5px;
+}
+
+/* monogram: a service-tile look — a role-colored rounded square with the label's first
+   letters, on a TRANSPARENT body, with the label beside/below. */
+.scene-node--mono {
+  background: none;
+  border: none;
+}
+.scene-node__mono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  background: var(--node-color);
+  color: #12151b;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.scene-node--mono .scene-node__label {
+  color: #f1f2f4;
+  font-weight: 300;
 }
 
 /* --- term: a filled chip whose text IS the concept ------------------------ */
@@ -133,6 +173,12 @@
   overflow: hidden;
   text-overflow: clip;
 }
+/* Region-header icon — rides in its container's role color, a touch dimmer than the text. */
+.scene-node--container .scene-node__title-icon {
+  flex: none;
+  color: color-mix(in srgb, var(--node-color) 70%, #cfd4dc);
+  opacity: 0.9;
+}
 
 /* --- ghost: the unrevealed skeleton a reveal builds up from ----------------
    Draw the full structure faintly — a dim outline, no fill, muted gray label — so the
@@ -156,6 +202,15 @@
 .scene-node--ghost .scene-node__type {
   color: #5b6473;
   font-weight: 500;
+}
+/* Ghost also mutes the icon glyph and the mono badge so the skeleton stays monochrome. */
+.scene-node--ghost .scene-node__icon,
+.scene-node--ghost .scene-node__title-icon {
+  color: #4c5563;
+}
+.scene-node--ghost .scene-node__mono {
+  background: #3a4150;
+  color: #12151b;
 }
 .scene-node--ghost .scene-node__sub {
   color: #4c5563;

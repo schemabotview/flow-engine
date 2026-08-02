@@ -12,7 +12,7 @@ export const catalog: Record<string, Concept> = {
   'apache-spark': {
     id: 'apache-spark',
     label: 'Apache Spark',
-    contentBaseUrl: 'https://raw.githubusercontent.com/schemabotview/apache-spark-content/main',
+    contentBaseUrl: 'https://raw.githubusercontent.com/schemabotview/apache-spark/main',
   },
 }
 
