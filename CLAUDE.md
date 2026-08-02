@@ -41,14 +41,26 @@ import 'flow-engine/styles.css'
 
 ## How it renders (the core)
 
-- **Ghost-and-solidify**: `SceneViewer` draws every scene element; `revealForPosition` returns the
-  set of solidified node/edge ids, everything else renders ghosted (faint). Not blur.
+- **Ghost-and-solidify + focus states**: `SceneViewer` draws every scene element. Three node states
+  (`sceneGraph.toFlowNodes` → `SceneNode` CSS classes): **ghost** = not in the reveal set (unrevealed
+  skeleton); **lit** (`--lit`) = revealed AND in the section's focus band (emphasised in its own
+  semantic color); **dimmed** (`--dimmed`) = revealed but out of focus (a past band). Edges dim to
+  match. Not blur.
+- **Per-section camera** (`SceneViewer` `Camera`): frames the section's `focus` band via
+  `rf.fitBounds(rect)`, where `rect` is the union of the grid-resolved boxes for the focus ids —
+  **not** React Flow's measured node sizes (flat custom-sized nodes never settle, so `fitView({nodes})`
+  / `useNodesInitialized` silently no-op; `fitBounds` on our own rect + a `requestAnimationFrame` is
+  reliable). Empty focus → whole-scene fit (the ghosted "overview" opener). `RevealPlayer` resolves a
+  section's focus via `sectionFocus` (default = the nodes it solidifies; `Section.focus` overrides).
 - **Reveal = pure fold of the beat index** (`reveal.ts` `revealAt`): never mutated forward. Nav
   (`nav.ts`) folds across a *scene run* (consecutive same-scene sections accumulate; a scene change
   resets to fully ghosted). This purity is what makes capture-seek and reload truthful.
 - **Reveal verbs** (`RevealDelta`): `solidify` · `draw` (edge) · `pulse` · `annotate` · `pan`.
   Additive only. `solidify`/`draw` render today; `pulse`/`annotate`/`pan` are folded but **not yet
-  drawn**.
+  drawn** (the per-section camera is separate from the per-beat `pan` verb, which is still deferred).
+- **Slide** (`SlidePane`): the right pane renders `slide.body` (a Markdown string) with
+  `react-markdown` + `remark-gfm`; generic element CSS in `player.css` (`.slide__body h3/ul/li/…`)
+  styles it, so authors write Markdown, not per-element markup.
 - **Narration** (`useNarration`): one `<audio>`; a beat fires when its clip starts, clip length is
   the timing (no timestamps); clip-end auto-advances the beat.
 
@@ -62,7 +74,8 @@ npm run build     # Vite lib → dist/flow-engine.js + .css + index.d.ts
   committed `dist` via `exports` — no build-on-install. **After changing `src/`, rebuild and commit
   `dist/`**, or consumers won't see the change.
 - Peers (`react`, `react-dom`, `@xyflow/react`, `lucide-react`) are externalized — the consumer
-  provides them.
+  provides them. `react-markdown` + `remark-gfm` (for the Markdown slide) are **bundled into `dist`**,
+  so concept apps need no extra install.
 - **No Tailwind dependency**: the player chrome is plain CSS (`frame/player.css` + `engine/scene.css`)
   bundled into `flow-engine.css`. Consumers import `'flow-engine/styles.css'`; nothing else needed.
 
@@ -79,8 +92,11 @@ npm run build     # Vite lib → dist/flow-engine.js + .css + index.d.ts
 - **`flow-engine/pure`**: a second, DOM-free entry exporting `validateCourse`/`revealAt`/nav/types/
   authoring helpers (no `@xyflow/react`), so a concept app's CI can run a `node` build-gate on
   beat-id drift. Today the bundle imports React Flow (DOM), so only dev-load validation runs.
-- Rendering of `pulse` / `annotate` / `pan`. `annotate` visual is an open question (badge? inline?).
-- Camera/focus model (per-section zoom push-in + focus-dim two-phase intro). Only whole-scene fitView.
+- Rendering of `pulse` / `annotate` / the per-*beat* `pan` camera. `annotate` visual is an open
+  question (badge? inline?).
+- **Done (was deferred):** per-section camera (`fitBounds` to the focus band) + focus-dim
+  (ghost/lit/dimmed). Still deferred: a **timed two-phase intro** (auto overview → Ken-Burns); today
+  the "overview" is authored as a section with empty focus, and the camera moves on section change.
 - Capture mode: `__captureReady` handshake + **preload + seek** off the pure fold (never drive
   capture off the audio `ended` event — a failed live fetch would hang the recording).
 

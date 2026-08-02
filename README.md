@@ -14,7 +14,8 @@ npm install github:schemabotview/flow-engine react react-dom @xyflow/react lucid
 ```
 
 The built `dist/` is committed, so GitHub install needs no build step. `react`, `react-dom`,
-`@xyflow/react`, and `lucide-react` are peer dependencies.
+`@xyflow/react`, and `lucide-react` are peer dependencies. (`react-markdown` + `remark-gfm`, used by
+the Markdown slide, are bundled into `dist` — no extra install.)
 
 ## Use
 
@@ -35,7 +36,9 @@ export default () => (
 ```
 
 `RevealPlayer` owns the fixed 1920×1080 two-pane stage, the (section, beat) cursor, the reveal fold,
-narration, and the SPACE / ← → transport. The engine ships plain CSS (no Tailwind needed).
+the **per-section camera** (frames each section's `focus` band; empty focus = whole-scene overview),
+narration, and the SPACE / ← → transport. A section's `slide.body` is **Markdown** (react-markdown +
+GFM). The engine ships plain CSS (no Tailwind needed).
 
 ## Public API
 

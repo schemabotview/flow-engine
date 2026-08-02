@@ -4,7 +4,7 @@ import type { SceneSpec } from '../engine/types.ts'
 import { useNarration } from '../hooks/useNarration.ts'
 import { SlidePane } from './SlidePane.tsx'
 import type { Course } from '../content/types.ts'
-import { revealForPosition, step, type Position } from '../content/nav.ts'
+import { revealForPosition, sectionFocus, step, type Position } from '../content/nav.ts'
 import './player.css'
 
 // The reusable player: given a Course + a scene resolver + a base URL for audio, it owns
@@ -55,6 +55,11 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
     [sections, pos, section],
   )
 
+  // Per-section camera framing: the nodes to fit while this section plays (default = the
+  // nodes it solidifies; see sectionFocus). Keyed on the section index so the camera moves
+  // on a section change and holds steady across the section's beats.
+  const focus = useMemo(() => (section ? sectionFocus(section) : []), [section])
+
   // Per-beat narration by convention: `<audioBase>/<section-id>-<beatIndex>.wav`.
   const audioUrl = section ? `${audioBase}/${section.id}-${pos.beat}.wav` : undefined
   const { toggle, stop } = useNarration(audioUrl, () =>
@@ -97,7 +102,7 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
           }}
         >
           <div className="rp-scene-pane" style={{ width: SCENE_W }}>
-            {scene && <SceneViewer scene={scene} reveal={reveal} />}
+            {scene && <SceneViewer scene={scene} reveal={reveal} focus={focus} />}
           </div>
           {/* Right pane: the section's static slide (the capture frame — no dev chrome). */}
           <div className="rp-slide-pane" style={{ width: SLIDE_W }}>

@@ -70,8 +70,11 @@ export function FlowEdge({ id, source, target, data, markerEnd }: EdgeProps) {
   const label = data?.label as string | undefined
   // Ghost: the edge exists in the skeleton but hasn't been drawn — a faint dashed line,
   // no arrowhead, no travelling dot, and its label stays hidden until it solidifies.
+  // Dimmed: a drawn edge in a past era (both endpoints out of focus) — solid but faded,
+  // no travelling dot or label, so it recedes with its nodes.
   const ghosted = data?.ghosted === true
-  const showDot = data?.animated !== false && !ghosted
+  const dimmed = data?.dimmed === true
+  const showDot = data?.animated !== false && !ghosted && !dimmed
 
   return (
     <>
@@ -82,7 +85,7 @@ export function FlowEdge({ id, source, target, data, markerEnd }: EdgeProps) {
         style={{
           stroke: color,
           strokeWidth: 1.75,
-          opacity: ghosted ? 0.14 : 0.6,
+          opacity: ghosted ? 0.14 : dimmed ? 0.25 : 0.6,
           strokeDasharray: ghosted ? '5 5' : undefined,
         }}
       />
@@ -91,7 +94,7 @@ export function FlowEdge({ id, source, target, data, markerEnd }: EdgeProps) {
           <animateMotion dur="2.4s" repeatCount="indefinite" path={path} />
         </circle>
       )}
-      {label && !ghosted && (
+      {label && !ghosted && !dimmed && (
         <EdgeLabelRenderer>
           <div
             className="scene-edge-label"

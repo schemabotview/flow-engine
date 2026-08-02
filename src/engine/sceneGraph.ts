@@ -33,9 +33,17 @@ export function toFlowNodes(
   boxes: Record<string, Box>,
   direction: 'horizontal' | 'vertical',
   nodes: Set<string> | null,
+  focus: Set<string> | null,
 ): Node<SceneNodeData>[] {
+  // Three mutually exclusive states (see SceneNode / scene.css): a node not in `nodes` is
+  // GHOST (unrevealed); a revealed node in `focus` is LIT (current era); a revealed node
+  // outside `focus` is DIMMED (a past era). With no focus in play, revealed nodes stay base
+  // solid (highlighted/dimmed both false), preserving pre-focus behavior.
+  const hasFocus = !!focus && focus.size > 0
   return flatten(scene.nodes).map((n) => {
     const box = boxes[n.id]
+    const revealed = nodes ? nodes.has(n.id) : true
+    const inFocus = hasFocus ? focus!.has(n.id) : true
     return {
       id: n.id,
       type: 'scene',
@@ -54,7 +62,9 @@ export function toFlowNodes(
         direction,
         width: box.w,
         height: box.h,
-        ghosted: nodes ? !nodes.has(n.id) : false,
+        ghosted: !revealed,
+        highlighted: revealed && hasFocus && inFocus,
+        dimmed: revealed && hasFocus && !inFocus,
       },
     }
   })
@@ -64,16 +74,21 @@ export function toFlowEdges(
   scene: SceneSpec,
   nodes: Set<string> | null,
   drawn: Set<string> | null,
+  focus: Set<string> | null,
 ): Edge[] {
+  const hasFocus = !!focus && focus.size > 0
   return scene.edges.map((e, i) => {
     const solid =
       !nodes || (nodes.has(e.from) && nodes.has(e.to)) || (drawn?.has(edgeKey(e.from, e.to)) ?? false)
+    // A solid edge whose endpoints are BOTH out of the current focus band recedes with its
+    // nodes (a past era) — dimmed, not ghost.
+    const dimmed = solid && hasFocus && !focus!.has(e.from) && !focus!.has(e.to)
     return {
       id: `${e.from}-${e.to}-${i}`,
       source: e.from,
       target: e.to,
       type: 'flow',
-      data: { color: EDGE, animated: e.animated, label: e.label, ghosted: !solid },
+      data: { color: EDGE, animated: e.animated, label: e.label, ghosted: !solid, dimmed },
       markerEnd: { type: MarkerType.ArrowClosed, color: EDGE },
     }
   })

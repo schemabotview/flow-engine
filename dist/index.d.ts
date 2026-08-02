@@ -214,9 +214,10 @@ export declare interface SceneSpec {
     };
 }
 
-export declare function SceneViewer({ scene, reveal }: {
+export declare function SceneViewer({ scene, reveal, focus, }: {
     scene: SceneSpec;
     reveal?: RevealState | null;
+    focus?: string[];
 }): JSX.Element;
 
 export declare interface Section {
@@ -237,10 +238,12 @@ export declare interface Section {
     highlight?: string[];
 }
 
-/** The right-pane slide — one per section, static across the section's beats. */
+/** The right-pane slide — one per section, static across the section's beats. `body` is a
+ *  curated, one-screen subset of Markdown (headings, lists, tables, bold, code) rendered by
+ *  SlidePane via react-markdown + GFM — so authors write content, not per-element markup. */
 export declare interface Slide {
     title: string;
-    bullets: string[];
+    body: string;
 }
 
 export declare function SlidePane({ slide }: {

@@ -5,10 +5,12 @@ import type { Beat } from '../engine/reveal.ts'
 // per-section ordered [(line, delta)]. Slide + heading are per section; the per-beat
 // narration line lives inside each Beat. See CLAUDE.md → domain model.
 
-/** The right-pane slide — one per section, static across the section's beats. */
+/** The right-pane slide — one per section, static across the section's beats. `body` is a
+ *  curated, one-screen subset of Markdown (headings, lists, tables, bold, code) rendered by
+ *  SlidePane via react-markdown + GFM — so authors write content, not per-element markup. */
 export interface Slide {
   title: string
-  bullets: string[]
+  body: string
 }
 
 export interface Section {

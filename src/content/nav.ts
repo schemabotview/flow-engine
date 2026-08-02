@@ -35,6 +35,36 @@ export function revealForPosition(sections: Section[], pos: Position): RevealSta
 }
 
 /**
+ * The camera focus for a section — which nodes the per-section camera frames.
+ *
+ * Default (locked decision): focus = **the nodes the section solidifies** — the union of
+ * every `solidify` id across the section's beats. A section may override with `focus`
+ * (single id or list). If a section solidifies nothing (rare — e.g. it only draws edges),
+ * fall back to the drawn edges' endpoints; if still empty, return [] so the caller frames
+ * the whole scene. Per SECTION, not per beat: the frame holds steady across a section's
+ * beats (all nodes exist as ghosts, so it doesn't jitter as they fill in).
+ */
+export function sectionFocus(section: Section): string[] {
+  if (section.focus != null) {
+    return Array.isArray(section.focus) ? section.focus : [section.focus]
+  }
+  const ids = new Set<string>()
+  for (const beat of section.beats) {
+    for (const d of beat.delta) {
+      if (d.kind === 'solidify') for (const id of d.ids) ids.add(id)
+    }
+  }
+  if (ids.size === 0) {
+    for (const beat of section.beats) {
+      for (const d of beat.delta) {
+        if (d.kind === 'draw') for (const [from, to] of d.edges) { ids.add(from); ids.add(to) }
+      }
+    }
+  }
+  return [...ids]
+}
+
+/**
  * Step the cursor by ±1, rolling across section boundaries: past a section's last beat →
  * next section's first beat (and symmetrically for ←). Clamps at the course's very first
  * / last beat (returns the same position, so callers can detect the end).

@@ -27,6 +27,10 @@ export interface SceneNodeData {
   height: number
   /** Not yet revealed: render as the faint skeleton (see scene.css .scene-node--ghost). */
   ghosted?: boolean
+  /** Revealed AND in the current section's focus band: emphasised (.scene-node--lit). */
+  highlighted?: boolean
+  /** Revealed but OUT of the current focus (a past era): faded (.scene-node--dimmed). */
+  dimmed?: boolean
   [key: string]: unknown
 }
 
@@ -41,7 +45,15 @@ export function SceneNode({ data }: NodeProps) {
     return <div className="scene-node scene-node--group" style={{ width: d.width, height: d.height }} />
   }
 
-  const ghost = d.ghosted ? ' scene-node--ghost' : ''
+  // Mutually exclusive reveal/focus states: ghost (unrevealed) · lit (revealed, in focus) ·
+  // dimmed (revealed, past era). No class = revealed with no focus in play (base solid).
+  const state = d.ghosted
+    ? ' scene-node--ghost'
+    : d.highlighted
+      ? ' scene-node--lit'
+      : d.dimmed
+        ? ' scene-node--dimmed'
+        : ''
   const horizontal = d.direction === 'horizontal'
   const isContainer = d.kind === 'container'
   const mono = d.kind === 'symbol' && !!d.mono
@@ -63,7 +75,7 @@ export function SceneNode({ data }: NodeProps) {
 
   return (
     <div
-      className={`scene-node scene-node--${d.kind}${mono ? ' scene-node--mono' : ''}${inlineIcon ? ' scene-node--iconh' : ''}${ghost}`}
+      className={`scene-node scene-node--${d.kind}${mono ? ' scene-node--mono' : ''}${inlineIcon ? ' scene-node--iconh' : ''}${state}`}
       style={{ width: d.width, height: d.height, ['--node-color' as string]: d.color }}
     >
       <Handle type="target" position={horizontal ? Position.Left : Position.Top} className="scene-handle" isConnectable={false} />
