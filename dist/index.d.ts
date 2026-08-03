@@ -214,10 +214,12 @@ export declare interface SceneSpec {
     };
 }
 
-export declare function SceneViewer({ scene, reveal, focus, }: {
+export declare function SceneViewer({ scene, reveal, focus, fitMs, }: {
     scene: SceneSpec;
     reveal?: RevealState | null;
     focus?: string[];
+    /** Camera fit animation ms. Capture passes 0 so a seeked frame opens already-framed. */
+    fitMs?: number;
 }): JSX.Element;
 
 export declare interface Section {

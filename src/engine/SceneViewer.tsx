@@ -35,7 +35,15 @@ function unionBox(bs: Box[]): { x: number; y: number; width: number; height: num
 // path (`fitView({nodes})` / `useNodesInitialized`) silently no-ops. `fitBounds(rect)` needs
 // only the pane's own size, which the rAF defers a frame for. Re-fits whenever the focus id
 // set changes — i.e. per section — which is the Ken-Burns pan paging drives.
-function Camera({ boxes, focusIds }: { boxes: Record<string, Box>; focusIds: string[] }) {
+function Camera({
+  boxes,
+  focusIds,
+  fitMs = FIT_MS,
+}: {
+  boxes: Record<string, Box>
+  focusIds: string[]
+  fitMs?: number
+}) {
   const rf = useReactFlow()
   const key = focusIds.join(',')
   useEffect(() => {
@@ -43,10 +51,10 @@ function Camera({ boxes, focusIds }: { boxes: Record<string, Box>; focusIds: str
     const rect = unionBox(framed.length ? framed : Object.values(boxes))
     if (!rect) return
     const padding = framed.length ? FOCUS_PADDING : WHOLE_PADDING
-    const raf = requestAnimationFrame(() => rf.fitBounds(rect, { padding, duration: FIT_MS }))
+    const raf = requestAnimationFrame(() => rf.fitBounds(rect, { padding, duration: fitMs }))
     return () => cancelAnimationFrame(raf)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, boxes, rf])
+  }, [key, boxes, rf, fitMs])
   return null
 }
 
@@ -59,10 +67,13 @@ export function SceneViewer({
   scene,
   reveal = null,
   focus = [],
+  fitMs,
 }: {
   scene: SceneSpec
   reveal?: RevealState | null
   focus?: string[]
+  /** Camera fit animation ms. Capture passes 0 so a seeked frame opens already-framed. */
+  fitMs?: number
 }) {
   const direction = sceneDirection(scene)
   const boxes = useMemo(() => resolveGrid(scene.nodes, scene.grid, scene.canvas), [scene])
@@ -94,7 +105,7 @@ export function SceneViewer({
         minZoom={0.2}
         maxZoom={8}
       >
-        <Camera boxes={boxes} focusIds={focus} />
+        <Camera boxes={boxes} focusIds={focus} fitMs={fitMs} />
       </ReactFlow>
     </div>
   )

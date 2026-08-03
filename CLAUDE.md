@@ -28,6 +28,12 @@ flow-engine/
 
 - **`<RevealPlayer course getScene audioBase />`** — the whole playback surface (stage, (section,
   beat) cursor, reveal fold, narration, SPACE/←→ transport). A concept app mounts this.
+- **Capture surface** (`?capture=1`): the player exposes `window.__capture` for a headless recorder
+  (`CaptureApi`, exported). `plan()` → one entry per section `{ section, id, scene, beats }`; `seek`
+  jumps the cursor and fits the camera **instantly**; `transition(s, b, ms)` jumps and **animates**
+  the fit over `ms` from the current viewport (the per-section pan the recorder captures during the
+  bell lead). `window.__captureReady` flips true once the seeked frame has painted — the recorder
+  awaits it before rolling. Narration + key transport go inert in capture mode.
 - **Authoring helpers**: `container` / `group` / `wgrid` (build nested scene grids), the color
   constants (`BLUE`, `GREEN`, …), `getIcon`.
 - **Types**: `SceneSpec`, `SceneNodeSpec`, `Course`, `Section`, `Slide`, `Beat`, `RevealDelta`, …
@@ -121,8 +127,11 @@ npm run build     # Vite lib → dist/flow-engine.js + .css + index.d.ts
 - **Done (was deferred):** per-section camera (`fitBounds` to the focus band) + focus-dim
   (ghost/lit/dimmed). Still deferred: a **timed two-phase intro** (auto overview → Ken-Burns); today
   the "overview" is authored as a section with empty focus, and the camera moves on section change.
-- Capture mode: `__captureReady` handshake + **preload + seek** off the pure fold (never drive
-  capture off the audio `ended` event — a failed live fetch would hang the recording).
+- **Done (was deferred):** capture mode — the `?capture=1` `window.__capture` surface (`plan`/`seek`/
+  `transition`) + the `__captureReady` handshake, driven **preload + seek** off the pure fold (never
+  off the audio `ended` event — a failed live fetch would hang the recording). The recorder lives in
+  `schemabotview.github.io/capture` (`record-course.mjs`); `transition` powers the per-section pan it
+  records under each section's bell lead.
 
 ## Working agreement (HARD RULE)
 

@@ -41,13 +41,47 @@ export interface RevealPlayerProps {
   audioBase: string
 }
 
+/** The imperative surface a headless recorder drives in `?capture=1` mode. */
+export interface CaptureApi {
+  /** The course laid out for the recorder: one entry per section, in order. `scene` lets the
+   *  recorder pan only WITHIN a scene (a scene change has no shared band to travel across). */
+  plan(): { section: number; id: string; scene: string; beats: number }[]
+  /** Jump the cursor to an exact (section, beat) and fit the camera INSTANTLY (a seeked frame
+   *  opens already-framed); clears __captureReady until it repaints. */
+  seek(section: number, beat: number): void
+  /** Like seek, but ANIMATE the camera fit over `ms` from the current viewport — the per-section
+   *  transition pan. The recorder positions on the previous band + rolls first, then calls this,
+   *  so the Ken-Burns move to this section's band is captured (instead of lost between segments). */
+  transition(section: number, beat: number, ms: number): void
+}
+declare global {
+  interface Window {
+    __capture?: CaptureApi
+    /** Flips true once the fold + camera have painted the seeked frame; the recorder awaits it. */
+    __captureReady?: boolean
+  }
+}
+
 export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps) {
   const scale = useFitScale()
   const sections = course.sections
 
+  // Capture mode: a headless recorder deep-drives the player instead of a human. Narration
+  // and key transport go inert (the recorder supplies audio + timing by seeking off the pure
+  // fold — never off the audio `ended` event). A plain `seek` fits the camera instantly (a
+  // seeked frame opens already-framed); a `transition` animates the fit over the sting window,
+  // so the per-section pan is recorded instead of lost in the gap between segments.
+  const capture = useMemo(
+    () => typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('capture'),
+    [],
+  )
+
   // The (section, beat) cursor. ←/→ page beats and roll across section boundaries; reveal
   // is a PURE FOLD over the current scene-run (revealForPosition), never mutated forward.
   const [pos, setPos] = useState<Position>({ section: 0, beat: 0 })
+  // Capture-only: the fit duration for the NEXT seek — 0 (instant) for a plain seek, or the
+  // pan length for a `transition`. Set alongside `pos` so the Camera fits with the right timing.
+  const [captureFitMs, setCaptureFitMs] = useState(0)
   const section = sections[pos.section]
   const scene = section ? getScene(section.scene) : undefined
   const reveal = useMemo(
@@ -60,8 +94,9 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
   // on a section change and holds steady across the section's beats.
   const focus = useMemo(() => (section ? sectionFocus(section) : []), [section])
 
-  // Per-beat narration by convention: `<audioBase>/<section-id>-<beatIndex>.wav`.
-  const audioUrl = section ? `${audioBase}/${section.id}-${pos.beat}.wav` : undefined
+  // Per-beat narration by convention: `<audioBase>/<section-id>-<beatIndex>.wav`. Silenced
+  // in capture mode (the recorder muxes the clip; the app never plays or auto-advances).
+  const audioUrl = !capture && section ? `${audioBase}/${section.id}-${pos.beat}.wav` : undefined
   const { toggle, stop } = useNarration(audioUrl, () =>
     setPos((p) => {
       const next = step(sections, p, 1)
@@ -70,8 +105,10 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
     }),
   )
 
-  // Transport keys, re-bound each render so they see the latest toggle/stop.
+  // Transport keys, re-bound each render so they see the latest toggle/stop. Off in capture
+  // (the recorder drives the cursor via window.__capture.seek, not the keyboard).
   useLayoutEffect(() => {
+    if (capture) return
     const onKey = (e: KeyboardEvent) => {
       if (!sections.length) return
       if (e.key === 'ArrowRight') setPos((p) => step(sections, p, 1))
@@ -84,6 +121,47 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   })
+
+  // Capture driver: expose the seek/plan surface and clear the ready flag up front so the
+  // recorder never reads a stale `true` from a previous section between its seek and repaint.
+  useLayoutEffect(() => {
+    if (!capture) return
+    window.__captureReady = false
+    window.__capture = {
+      plan: () => sections.map((s, i) => ({ section: i, id: s.id, scene: s.scene, beats: s.beats.length })),
+      seek: (sectionIdx, beat) => {
+        window.__captureReady = false
+        setCaptureFitMs(0)
+        setPos({ section: sectionIdx, beat })
+      },
+      transition: (sectionIdx, beat, ms) => {
+        window.__captureReady = false
+        setCaptureFitMs(ms)
+        setPos({ section: sectionIdx, beat })
+      },
+    }
+    return () => {
+      delete window.__capture
+    }
+  }, [capture, sections])
+
+  // Ready handshake: after the fold + (instant) camera fit paint the seeked frame, flip
+  // __captureReady true. Two rAFs clear the Camera's own one-frame fitBounds defer, so the
+  // recorder starts its screencast on a settled, already-framed frame.
+  useLayoutEffect(() => {
+    if (!capture) return
+    window.__captureReady = false
+    let r2 = 0
+    const r1 = requestAnimationFrame(() => {
+      r2 = requestAnimationFrame(() => {
+        window.__captureReady = true
+      })
+    })
+    return () => {
+      cancelAnimationFrame(r1)
+      cancelAnimationFrame(r2)
+    }
+  }, [capture, pos])
 
   if (!section) return null
 
@@ -102,7 +180,9 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
           }}
         >
           <div className="rp-scene-pane" style={{ width: SCENE_W }}>
-            {scene && <SceneViewer scene={scene} reveal={reveal} focus={focus} />}
+            {scene && (
+              <SceneViewer scene={scene} reveal={reveal} focus={focus} fitMs={capture ? captureFitMs : undefined} />
+            )}
           </div>
           {/* Right pane: the section's static slide (the capture frame — no dev chrome). */}
           <div className="rp-slide-pane" style={{ width: SLIDE_W }}>
