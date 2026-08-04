@@ -149,6 +149,103 @@
   color: color-mix(in srgb, var(--node-color) 52%, #cfd4de 48%);
 }
 
+/* --- code: an IDE-editor card (window chrome + gutter + highlighted source) --
+   A neutral dark editor surface (independent of --node-color), overriding the
+   base centered flex to a top-to-bottom window layout. */
+.scene-node--code {
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #21252b;
+  border: 1px solid #31363f;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 6px 18px rgba(0, 0, 0, 0.28);
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: left;
+}
+/* window chrome bar: traffic-light dots (left) + filename tab (right) */
+.scene-node__code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  padding: 0 12px;
+  background: #1b1e24;
+  border-bottom: 1px solid #2b3039;
+}
+.scene-node__code-dots {
+  display: inline-flex;
+  gap: 7px;
+}
+.scene-node__code-dots i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.scene-node__code-file {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #8b909c;
+}
+/* body: numbered source lines, vertically centered in the remaining height */
+.scene-node__code-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35em;
+  padding: 0 16px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+.scene-node__code-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85em;
+  white-space: nowrap;
+}
+.scene-node__code-gutter {
+  flex: none;
+  width: 1.4em;
+  text-align: right;
+  color: #5c6472;
+  font-weight: 500;
+  user-select: none;
+}
+.scene-node__code-src {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
+}
+/* syntax token colors — One Dark mapped onto the locked saturated accents */
+.scene-node--code .tok-var { color: #eceef2; }
+.scene-node--code .tok-method { color: #5b8cff; }
+.scene-node--code .tok-keyword { color: #b98bff; }
+.scene-node--code .tok-string { color: #37d39a; }
+.scene-node--code .tok-number { color: #ff7a59; }
+.scene-node--code .tok-punct { color: #8b909c; }
+.scene-node--code .tok-comment { color: #8b909c; font-style: italic; }
+/* ghost: the editor recedes to a faint wireframe, all source ink → ghost gray */
+.scene-node--ghost.scene-node--code {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--node-color) 22%, var(--base));
+  box-shadow: none;
+}
+.scene-node--ghost.scene-node--code .scene-node__code-bar {
+  background: transparent;
+  border-bottom-color: color-mix(in srgb, var(--node-color) 18%, var(--base));
+}
+.scene-node--ghost.scene-node--code .scene-node__code-dots i { background: #434b5a !important; }
+.scene-node--ghost.scene-node--code [class*='tok-'],
+.scene-node--ghost.scene-node--code .scene-node__code-file,
+.scene-node--ghost.scene-node--code .scene-node__code-gutter { color: #727a88 !important; }
+/* lit: a subtle brightening of the editor border when this is the focus band */
+.scene-node--lit.scene-node--code {
+  border-color: #444b57;
+}
+
 /* --- container: subtle titled panel; title rides the top-left border ------- */
 .scene-node--container {
   background: color-mix(in srgb, var(--node-color) 12%, var(--base));

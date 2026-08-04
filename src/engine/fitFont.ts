@@ -24,6 +24,14 @@ export function fitLabelPx(label: string, w: number, h: number, kind: NodeKind, 
   return Math.max(7, Math.min(byWidth, byHeight, 18)) // symbol cap
 }
 
+/** Fit a `code` node's source line (monospace, one line, no wrap) to the body area. `chars`
+ *  = the longest line's length (code vs its comment); `lines` = how many rows the body holds. */
+export function fitCodePx(chars: number, w: number, h: number, lines = 1): number {
+  const byWidth = Math.max(w - 8, 6) / (Math.max(chars, 1) * 0.62) // mono advance ≈ 0.62em
+  const byHeight = Math.max(h - 10, 6) / (lines * 1.55)
+  return Math.max(9, Math.min(byWidth, byHeight, 24)) // code cap
+}
+
 /** Fit a container's on-border TITLE (one nowrap uppercase line) to its box width. */
 export function fitTitlePx(label: string, w: number): number {
   const avail = Math.max(w - 8, 6)

@@ -48,7 +48,7 @@ export function toFlowNodes(
     // label tucks BEHIND the node it crosses; containers/groups stay on their default low z
     // so labels read over their background. See scene.css .react-flow__edgelabel-renderer.
     const kind = n.kind ?? 'symbol'
-    const isLeaf = kind === 'symbol' || kind === 'term'
+    const isLeaf = kind === 'symbol' || kind === 'term' || kind === 'code'
     return {
       id: n.id,
       type: 'scene',
@@ -61,6 +61,7 @@ export function toFlowNodes(
         sub: n.sub,
         type: n.type,
         icon: n.icon,
+        filename: n.filename,
         iconInline: n.iconInline,
         mono: n.mono,
         color: n.color ?? GRAY,

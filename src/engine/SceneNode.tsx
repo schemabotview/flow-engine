@@ -1,7 +1,8 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import type { NodeKind } from './types.ts'
-import { fitLabelPx, fitTitlePx } from './fitFont.ts'
+import { fitLabelPx, fitTitlePx, fitCodePx } from './fitFont.ts'
 import { getIcon } from './icons.tsx'
+import { tokenizeCode } from './codeHighlight.ts'
 import { GRAY } from './colors.ts'
 
 /** "ElastiCache" → "El": first letter capitalized, the rest lowercased — the service-tile
@@ -17,6 +18,8 @@ export interface SceneNodeData {
   sub?: string
   type?: string
   icon?: string
+  /** Filename shown in the window-chrome tab of a `code` node. */
+  filename?: string
   iconInline?: boolean
   mono?: boolean
   color: string
@@ -55,6 +58,11 @@ export function SceneNode({ data }: NodeProps) {
         ? ' scene-node--dimmed'
         : ''
   const horizontal = d.direction === 'horizontal'
+
+  // A code node paints as an IDE-editor card (chrome + gutter + syntax-highlighted line),
+  // not a role-colored block — a whole separate layout, so branch out early.
+  if (d.kind === 'code') return <CodeCard d={d} state={state} horizontal={horizontal} />
+
   const isContainer = d.kind === 'container'
   const mono = d.kind === 'symbol' && !!d.mono
   const Icon = d.kind === 'symbol' || isContainer ? getIcon(d.icon) : undefined
@@ -115,3 +123,57 @@ export function SceneNode({ data }: NodeProps) {
 }
 
 SceneNode.defaultColor = GRAY
+
+// The `code` node: a small IDE window. Window chrome (traffic-light dots + a filename tab),
+// then a body of numbered lines — line 1 is `label` run through the syntax tokenizer, and an
+// optional comment line carries `sub` as `# …`. Ghost/lit/dimmed come in via `state` (scene.css
+// mutes the token colors when ghosted). Font is fit so the longest line stays on one row.
+function CodeCard({ d, state, horizontal }: { d: SceneNodeData; state: string; horizontal: boolean }) {
+  const codeChars = d.label.length
+  const commentChars = d.sub ? d.sub.length + 2 : 0 // "# " + sub
+  const lines = d.sub ? 2 : 1
+  // Reserve the chrome bar's height and the gutter's width before fitting the code font.
+  const barH = Math.max(20, Math.min(d.height * 0.18, 34))
+  const gutterW = 30
+  const font = fitCodePx(
+    Math.max(codeChars, commentChars),
+    d.width - gutterW - 26,
+    d.height - barH,
+    lines,
+  )
+  const tokens = tokenizeCode(d.label)
+
+  return (
+    <div
+      className={`scene-node scene-node--code${state}`}
+      style={{ width: d.width, height: d.height, ['--node-color' as string]: d.color }}
+    >
+      <Handle type="target" position={horizontal ? Position.Left : Position.Top} className="scene-handle" isConnectable={false} />
+      <div className="scene-node__code-bar" style={{ height: barH }}>
+        <span className="scene-node__code-dots">
+          <i style={{ background: '#ff5f56' }} />
+          <i style={{ background: '#ffbd2e' }} />
+          <i style={{ background: '#27c93f' }} />
+        </span>
+        {d.filename && <span className="scene-node__code-file">{d.filename}</span>}
+      </div>
+      <div className="scene-node__code-body" style={{ fontSize: font }}>
+        <div className="scene-node__code-line">
+          <span className="scene-node__code-gutter">1</span>
+          <span className="scene-node__code-src">
+            {tokens.map((t, i) => (
+              <span key={i} className={`tok-${t.cls}`}>{t.text}</span>
+            ))}
+          </span>
+        </div>
+        {d.sub && (
+          <div className="scene-node__code-line">
+            <span className="scene-node__code-gutter" />
+            <span className="scene-node__code-src tok-comment">{`# ${d.sub}`}</span>
+          </div>
+        )}
+      </div>
+      <Handle type="source" position={horizontal ? Position.Right : Position.Bottom} className="scene-handle" isConnectable={false} />
+    </div>
+  )
+}

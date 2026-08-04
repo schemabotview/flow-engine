@@ -6,10 +6,12 @@
 /**
  * 'symbol'    = filled role-colored block: bold title (+ optional `sub` caption).
  * 'term'      = mono filled chip whose text IS the concept (an option/value).
+ * 'code'      = an IDE-editor card: window chrome + line-number gutter + the `label`
+ *               rendered as SYNTAX-HIGHLIGHTED source (a `sub` becomes a `# comment` line).
  * 'container' = titled box whose `children` lay out INSIDE it (title rides border).
  * 'group'     = invisible arranger: no chrome, only sub-lays out its `children`.
  */
-export type NodeKind = 'symbol' | 'term' | 'container' | 'group'
+export type NodeKind = 'symbol' | 'term' | 'code' | 'container' | 'group'
 
 export interface SceneNodeSpec {
   id: string
@@ -26,6 +28,8 @@ export interface SceneNodeSpec {
   type?: string
   /** Optional icon name (see engine/icons, added later) for a `symbol` node. */
   icon?: string
+  /** Filename shown in the window-chrome tab of a `code` node (e.g. `query.py`). */
+  filename?: string
   /** Render the icon to the LEFT of the label (instead of above), for short-but-wide boxes. */
   iconInline?: boolean
   /** Render a MONOGRAM badge instead of a lucide icon — the service-tile look. `symbol` only. */
