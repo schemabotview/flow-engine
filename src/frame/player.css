@@ -110,6 +110,7 @@
   font-style: italic;
   color: rgba(255, 255, 255, 0.85);
 }
+/* Inline code — a subtle chip. */
 .slide__body code {
   font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.9em;
@@ -117,6 +118,74 @@
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* Fenced code block — an elevated, framed panel (darker than the slide surface). Long lines
+   WRAP rather than clip, so nothing is lost in a static 4K capture; overflow-x is a fallback. */
+.slide__body pre {
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: #21252b;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow-x: auto;
+}
+.slide__body pre code {
+  display: block;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 16.5px;
+  line-height: 1.55;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: #c8cdd6;
+  white-space: pre-wrap;   /* wrap long lines at whitespace — capture-safe */
+  overflow-wrap: normal;   /* but never break inside an identifier */
+  tab-size: 2;
+}
+
+/* Syntax tokens (highlight.js classes) — the "Zed One Dark slate" palette, tuned to the
+   course's saturated accents so it survives YouTube compression. */
+.slide__body .hljs-comment,
+.slide__body .hljs-quote {
+  color: #7d8494;
+  font-style: italic;
+}
+.slide__body .hljs-keyword,
+.slide__body .hljs-selector-tag,
+.slide__body .hljs-section,
+.slide__body .hljs-name {
+  color: #c795f0;
+}
+.slide__body .hljs-string,
+.slide__body .hljs-regexp,
+.slide__body .hljs-symbol,
+.slide__body .hljs-bullet {
+  color: #7ec98f;
+}
+.slide__body .hljs-number,
+.slide__body .hljs-literal {
+  color: #e0995e;
+}
+.slide__body .hljs-title,
+.slide__body .hljs-title.function_,
+.slide__body .hljs-built_in {
+  color: #6aa3ff;
+}
+.slide__body .hljs-title.class_,
+.slide__body .hljs-type,
+.slide__body .hljs-class .hljs-title {
+  color: #d9b84a;
+}
+.slide__body .hljs-attr,
+.slide__body .hljs-attribute,
+.slide__body .hljs-variable,
+.slide__body .hljs-params,
+.slide__body .hljs-property {
+  color: #4fc3cc;
+}
+.slide__body .hljs-meta {
+  color: #7d8494;
 }
 .slide__body a {
   color: #8fb2ff;
