@@ -374,6 +374,7 @@
   border-bottom: 1px solid color-mix(in srgb, var(--node-color) 38%, var(--base));
 }
 .scene-node__table td {
+  text-align: left;
   padding: 0.3em 16px;
   white-space: nowrap;
   color: #eceef2;
