@@ -201,6 +201,10 @@ export declare interface SceneNodeSpec {
     iconInline?: boolean;
     /** Render a MONOGRAM badge instead of a lucide icon — the service-tile look. `symbol` only. */
     mono?: boolean;
+    /** Render a `symbol` as a thin VERTICAL TAB: label rotated 90° in a narrow colored bar (icon on
+     *  top, no sub-label). For a band label beside wide code/detail cards — spends the row's height,
+     *  not its width, so it barely widens a section's camera frame. `symbol` only. */
+    vertical?: boolean;
     /** Inner grid for this node's `children`, resolved inside this node's box. */
     layout?: SceneGrid;
     /** Child nodes laid out inside this node's box via `layout`. */

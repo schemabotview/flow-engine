@@ -25,6 +25,8 @@ export interface SceneNodeData {
   rows?: string[][]
   iconInline?: boolean
   mono?: boolean
+  /** Render a `symbol` as a thin vertical tab (rotated label). See SceneNodeSpec.vertical. */
+  vertical?: boolean
   color: string
   kind: NodeKind
   /** Dominant flow direction of the scene, sets handle placement. */
@@ -68,6 +70,10 @@ export function SceneNode({ data }: NodeProps) {
 
   // A table node paints as a titled data grid (header row + cell rows) — its own layout.
   if (d.kind === 'table') return <TableCard d={d} state={state} horizontal={horizontal} />
+
+  // A vertical tab: a thin role-colored bar with the label rotated 90° — a band label beside wide
+  // code/detail cards. Its own tiny layout, so branch out early.
+  if (d.kind === 'symbol' && d.vertical) return <VerticalTab d={d} state={state} />
 
   const isContainer = d.kind === 'container'
   const mono = d.kind === 'symbol' && !!d.mono
@@ -180,6 +186,29 @@ function CodeCard({ d, state, horizontal }: { d: SceneNodeData; state: string; h
         )}
       </div>
       <Handle type="source" position={horizontal ? Position.Right : Position.Bottom} className="scene-handle" isConnectable={false} />
+    </div>
+  )
+}
+
+// A thin VERTICAL TAB: the label rotated to read bottom-to-top in a narrow role-colored bar, with
+// the icon stacked on top. Used as a band label beside wide code/detail cards — it spends the row's
+// HEIGHT for its text, so a section framing [tab + cards] is barely wider than the cards alone.
+// Ghost/lit/dimmed arrive via `state` (same classes as any node); no sub-label (the slide carries it).
+function VerticalTab({ d, state }: { d: SceneNodeData; state: string }) {
+  const Icon = getIcon(d.icon)
+  const iconSize = Math.max(15, Math.min(d.width * 0.42, 26))
+  // Fit the (rotated) label to the box HEIGHT, leaving room for the stacked icon; also cap by
+  // width so a long name never overflows a thin bar.
+  const avail = Math.max(d.height - (Icon ? iconSize + 20 : 20), 20)
+  const chars = Math.max(1, d.label.length)
+  const font = Math.max(9, Math.min(avail / (chars * 0.62), d.width * 0.5, 22))
+  return (
+    <div
+      className={`scene-node scene-node--vtab${state}`}
+      style={{ width: d.width, height: d.height, ['--node-color' as string]: d.color }}
+    >
+      {Icon && <Icon className="scene-node__vtab-icon" size={iconSize} strokeWidth={1.75} />}
+      <span className="scene-node__vtab-label" style={{ fontSize: font }}>{d.label}</span>
     </div>
   )
 }

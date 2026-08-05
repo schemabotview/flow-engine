@@ -66,6 +66,7 @@ export function toFlowNodes(
         rows: n.rows,
         iconInline: n.iconInline,
         mono: n.mono,
+        vertical: n.vertical,
         color: n.color ?? GRAY,
         kind: n.kind ?? 'symbol',
         direction,

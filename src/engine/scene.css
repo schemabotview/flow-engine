@@ -110,6 +110,49 @@
   font-weight: 300;
 }
 
+/* --- vtab: a thin vertical band-label bar (rotated label) ------------------
+   A narrow role-colored bar with the label rotated to read bottom-to-top and the icon on top.
+   Sits beside wide code/detail cards as the band's anchor without eating horizontal room. */
+.scene-node--vtab {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 0;
+  border-radius: 8px;
+  background: var(--fill);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.scene-node__vtab-icon {
+  color: var(--node-color);
+  flex: none;
+}
+.scene-node__vtab-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 600;
+  color: #eceef2;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1;
+}
+.scene-node--ghost.scene-node--vtab {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--node-color) 26%, var(--base));
+}
+.scene-node--ghost .scene-node__vtab-label {
+  color: #727a88;
+  font-weight: 500;
+}
+.scene-node--ghost .scene-node__vtab-icon {
+  color: #626b7a;
+}
+.scene-node--lit.scene-node--vtab {
+  background: color-mix(in srgb, var(--node-color) 40%, var(--base));
+  border-color: color-mix(in srgb, var(--node-color) 62%, var(--base));
+}
+
 /* --- term: a filled chip whose text IS the concept ------------------------ */
 .scene-node--term {
   background: color-mix(in srgb, var(--node-color) 34%, var(--base));
