@@ -130,6 +130,15 @@ additive / backward-compatible:
 4. **`Section.highlight`** — wired (was reserved): camera frames `focus`, `highlight` is the lit set.
    `SceneViewer` gained a `highlight` prop; `RevealPlayer` passes `section.highlight`.
 
+## Later addition (2026-08-05) — built while authoring `python`
+
+5. **`vertical` symbol flag** (`SceneNodeSpec.vertical?: boolean`, symbol-only) — renders a thin
+   VERTICAL TAB: the label rotated to read bottom-to-top in a narrow role-colored bar, icon stacked
+   on top, no sub-label. `SceneNode` `VerticalTab`; `sceneGraph` passes `vertical`; `scene.css`
+   `.scene-node--vtab` (+ ghost/lit). For a **band label beside wide code/detail cards** — it spends
+   the row's HEIGHT for its text, so a section framing `[tab + cards]` is barely wider than the cards
+   alone (keeps their zoom). Additive/opt-in. First use: python `syntax-map` / `data-structures`.
+
 ## Locked decisions (do not relitigate)
 
 - Ghost-and-solidify, **not** blur. · Reveal is a **pure fold of the beat index**. · **Scene** is the
