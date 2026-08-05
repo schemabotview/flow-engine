@@ -3,14 +3,19 @@
 // classifies each run; the `code` branch of SceneNode paints each token in its class color
 // (see scene.css .tok-*). General enough for Python / Scala / SQL-ish one-liners across concepts.
 
-export type TokClass = 'var' | 'method' | 'keyword' | 'string' | 'number' | 'punct' | 'ws'
+export type TokClass = 'var' | 'method' | 'keyword' | 'string' | 'number' | 'punct' | 'ws' | 'comment'
 export interface CodeTok { cls: TokClass; text: string }
 
 // A tiny keyword set (Python / Scala / SQL surface); an identifier NOT after a `.` and in this
 // set paints as a keyword. Kept small on purpose — unknown identifiers fall back to `var`.
 const KEYWORDS = new Set([
   'import', 'from', 'def', 'return', 'lambda', 'class', 'val', 'var', 'new', 'if', 'else', 'for',
-  'in', 'as', 'select', 'where', 'group', 'by', 'join', 'on', 'and', 'or', 'not', 'null', 'true', 'false',
+  'in', 'as', 'and', 'or', 'not', 'null', 'true', 'false', 'is',
+  // SQL clauses + common verbs (so a multi-line query reads as coloured source)
+  'select', 'where', 'group', 'by', 'join', 'inner', 'left', 'right', 'full', 'outer', 'cross',
+  'on', 'using', 'having', 'order', 'asc', 'desc', 'limit', 'offset', 'distinct', 'with', 'recursive',
+  'union', 'intersect', 'except', 'all', 'insert', 'into', 'values', 'update', 'set', 'delete',
+  'over', 'partition', 'between', 'like', 'exists', 'case', 'when', 'then', 'end', 'count', 'sum', 'avg', 'min', 'max',
 ])
 
 const isIdentStart = (c: string) => /[A-Za-z_]/.test(c)
@@ -39,6 +44,13 @@ export function tokenizeCode(src: string): CodeTok[] {
       push('ws', src.slice(i, j))
       i = j
       continue
+    }
+
+    // line comment: `-- …` (SQL) or `# …` (Python/shell) → rest of the line is a comment.
+    // tokenizeCode runs per line, so consuming to end-of-string is end-of-line.
+    if ((c === '-' && src[i + 1] === '-') || c === '#') {
+      push('comment', src.slice(i))
+      break
     }
 
     // string literal ('…' or "…")

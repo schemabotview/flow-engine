@@ -56,8 +56,10 @@ export declare const group: (id: string, inner: PatternResult) => SceneNodeSpec;
  *               rendered as SYNTAX-HIGHLIGHTED source (a `sub` becomes a `# comment` line).
  * 'container' = titled box whose `children` lay out INSIDE it (title rides border).
  * 'group'     = invisible arranger: no chrome, only sub-lays out its `children`.
+ * 'table'     = a data grid: a title bar + `columns` header row + `rows` of cells (real
+ *               table look for showing sample DATA, vs `container`+`term` rows for a schema).
  */
-export declare type NodeKind = 'symbol' | 'term' | 'code' | 'container' | 'group';
+export declare type NodeKind = 'symbol' | 'term' | 'code' | 'container' | 'group' | 'table';
 
 /** Convenience alias for a leaf/node before it's placed (cell defaults to [0,0]). */
 export declare type NodeSeed = SceneNodeSpec;
@@ -191,6 +193,10 @@ export declare interface SceneNodeSpec {
     icon?: string;
     /** Filename shown in the window-chrome tab of a `code` node (e.g. `query.py`). */
     filename?: string;
+    /** For a `table` node: the column headers (the head row). */
+    columns?: string[];
+    /** For a `table` node: the data rows — each inner array is one row, length = columns.length. */
+    rows?: string[][];
     /** Render the icon to the LEFT of the label (instead of above), for short-but-wide boxes. */
     iconInline?: boolean;
     /** Render a MONOGRAM badge instead of a lucide icon — the service-tile look. `symbol` only. */
@@ -218,10 +224,15 @@ export declare interface SceneSpec {
     };
 }
 
-export declare function SceneViewer({ scene, reveal, focus, fitMs, }: {
+export declare function SceneViewer({ scene, reveal, focus, highlight, fitMs, }: {
     scene: SceneSpec;
     reveal?: RevealState | null;
+    /** Camera framing: the node ids the per-section camera fits (empty → whole scene). */
     focus?: string[];
+    /** The lit set (emphasised; everything else revealed dims). Defaults to `focus` when null,
+     *  so the camera and the highlight coincide unless a section decouples them — letting a
+     *  section keep a WIDE frame (context) while lighting only a few nodes. */
+    highlight?: string[] | null;
     /** Camera fit animation ms. Capture passes 0 so a seeked frame opens already-framed. */
     fitMs?: number;
 }): JSX.Element;
@@ -239,8 +250,12 @@ export declare interface Section {
      * scene's raw node ids — a scene may be ridden by many sections, each with its own beats.
      */
     beats: Beat[];
-    /** Camera framing (per section) — wired in a later slice. */
+    /** Camera framing (per section): the node ids the camera fits. Default = the nodes the
+     *  section solidifies; `[]` frames the whole scene. */
     focus?: string | string[];
+    /** The LIT set — decouples highlight from camera. When set, the camera still frames `focus`
+     *  (keeping context) but only these ids light and the rest of the revealed scene dims. When
+     *  omitted, the lit set falls back to `focus` (camera and highlight coincide). */
     highlight?: string[];
 }
 

@@ -26,8 +26,12 @@ export interface Section {
    * scene's raw node ids — a scene may be ridden by many sections, each with its own beats.
    */
   beats: Beat[]
-  /** Camera framing (per section) — wired in a later slice. */
+  /** Camera framing (per section): the node ids the camera fits. Default = the nodes the
+   *  section solidifies; `[]` frames the whole scene. */
   focus?: string | string[]
+  /** The LIT set — decouples highlight from camera. When set, the camera still frames `focus`
+   *  (keeping context) but only these ids light and the rest of the revealed scene dims. When
+   *  omitted, the lit set falls back to `focus` (camera and highlight coincide). */
   highlight?: string[]
 }
 

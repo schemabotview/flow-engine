@@ -93,6 +93,9 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
   // nodes it solidifies; see sectionFocus). Keyed on the section index so the camera moves
   // on a section change and holds steady across the section's beats.
   const focus = useMemo(() => (section ? sectionFocus(section) : []), [section])
+  // The lit set — decoupled from the camera frame. When a section sets `highlight`, the camera
+  // still frames `focus` (context) but only `highlight` lights; otherwise lit falls back to focus.
+  const highlight = useMemo(() => section?.highlight ?? null, [section])
 
   // Per-beat narration by convention: `<audioBase>/<section-id>-<beatIndex>.wav`. Silenced
   // in capture mode (the recorder muxes the clip; the app never plays or auto-advances).
@@ -181,7 +184,7 @@ export function RevealPlayer({ course, getScene, audioBase }: RevealPlayerProps)
         >
           <div className="rp-scene-pane" style={{ width: SCENE_W }}>
             {scene && (
-              <SceneViewer scene={scene} reveal={reveal} focus={focus} fitMs={capture ? captureFitMs : undefined} />
+              <SceneViewer scene={scene} reveal={reveal} focus={focus} highlight={highlight} fitMs={capture ? captureFitMs : undefined} />
             )}
           </div>
           {/* Right pane: the section's static slide (the capture frame — no dev chrome). */}

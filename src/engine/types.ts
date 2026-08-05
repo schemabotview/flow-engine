@@ -10,8 +10,10 @@
  *               rendered as SYNTAX-HIGHLIGHTED source (a `sub` becomes a `# comment` line).
  * 'container' = titled box whose `children` lay out INSIDE it (title rides border).
  * 'group'     = invisible arranger: no chrome, only sub-lays out its `children`.
+ * 'table'     = a data grid: a title bar + `columns` header row + `rows` of cells (real
+ *               table look for showing sample DATA, vs `container`+`term` rows for a schema).
  */
-export type NodeKind = 'symbol' | 'term' | 'code' | 'container' | 'group'
+export type NodeKind = 'symbol' | 'term' | 'code' | 'container' | 'group' | 'table'
 
 export interface SceneNodeSpec {
   id: string
@@ -30,6 +32,10 @@ export interface SceneNodeSpec {
   icon?: string
   /** Filename shown in the window-chrome tab of a `code` node (e.g. `query.py`). */
   filename?: string
+  /** For a `table` node: the column headers (the head row). */
+  columns?: string[]
+  /** For a `table` node: the data rows — each inner array is one row, length = columns.length. */
+  rows?: string[][]
   /** Render the icon to the LEFT of the label (instead of above), for short-but-wide boxes. */
   iconInline?: boolean
   /** Render a MONOGRAM badge instead of a lucide icon — the service-tile look. `symbol` only. */

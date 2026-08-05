@@ -127,11 +127,19 @@
 /* --- ERD row: a term carrying a data type — name left, type right --------- */
 .scene-node__row {
   display: flex;
+  /* border-box so the inset below is subtracted FROM the 100% width, not added outside it
+     (content-box would push the label/type back out to the box edges — the padding would
+     land outside the visible node). */
+  box-sizing: border-box;
   width: 100%;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
-  padding: 0 10px;
+  gap: 10px;
+  /* Generous horizontal inset so the column name + type tag always breathe inside the row,
+     regardless of how tight the parent table's container padding is (authors pack ERD tables
+     edge-to-edge to widen rows; this keeps the text off the box border). Scene-space px, so
+     it scales down with the canvas — hence larger than a typical DOM value. */
+  padding: 0 22px;
 }
 .scene-node__row .scene-node__label {
   flex: 1 1 auto;
@@ -196,7 +204,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 0.35em;
-  padding: 0 16px;
+  padding: 18px 16px; /* vertical breathing room so the first/last line never touch the edges */
   line-height: 1.5;
   overflow: hidden;
 }
@@ -218,6 +226,9 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: clip;
+  /* Preserve exact whitespace — leading indentation (Python blocks) and aligned columns
+     (e.g. right-aligned SQL comments) — instead of collapsing runs as `nowrap` would. */
+  white-space: pre;
 }
 /* syntax token colors — One Dark mapped onto the locked saturated accents */
 .scene-node--code .tok-var { color: #eceef2; }
@@ -315,6 +326,76 @@
 }
 .scene-node--ghost .scene-node__sub {
   color: #626b7a;
+}
+
+/* --- table: a data grid (title bar + header row + cell rows) -------------- */
+.scene-node--table {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--node-color) 13%, var(--base));
+  border: 1px solid color-mix(in srgb, var(--node-color) 42%, var(--base));
+}
+.scene-node__table-title {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0 16px;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--node-color) 65%, #ffffff 35%);
+  border-bottom: 1px solid color-mix(in srgb, var(--node-color) 34%, var(--base));
+}
+.scene-node__table-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 4px 0;
+}
+.scene-node__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+.scene-node__table th {
+  text-align: left;
+  padding: 0.32em 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--node-color) 58%, #cfd4de 42%);
+  border-bottom: 1px solid color-mix(in srgb, var(--node-color) 38%, var(--base));
+}
+.scene-node__table td {
+  padding: 0.3em 16px;
+  white-space: nowrap;
+  color: #eceef2;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.scene-node__table tbody tr:last-child td {
+  border-bottom: none;
+}
+/* table reveal states */
+.scene-node--ghost.scene-node--table {
+  background: transparent;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--node-color) 20%, var(--base));
+}
+.scene-node--ghost.scene-node--table .scene-node__table-title,
+.scene-node--ghost.scene-node--table th,
+.scene-node--ghost.scene-node--table td {
+  color: #727a88;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.scene-node--lit.scene-node--table {
+  border-color: color-mix(in srgb, var(--node-color) 62%, var(--base));
 }
 
 /* --- focus states (pre-wired for the reveal slices) ----------------------- */

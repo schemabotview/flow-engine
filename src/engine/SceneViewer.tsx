@@ -67,25 +67,34 @@ export function SceneViewer({
   scene,
   reveal = null,
   focus = [],
+  highlight = null,
   fitMs,
 }: {
   scene: SceneSpec
   reveal?: RevealState | null
+  /** Camera framing: the node ids the per-section camera fits (empty → whole scene). */
   focus?: string[]
+  /** The lit set (emphasised; everything else revealed dims). Defaults to `focus` when null,
+   *  so the camera and the highlight coincide unless a section decouples them — letting a
+   *  section keep a WIDE frame (context) while lighting only a few nodes. */
+  highlight?: string[] | null
   /** Camera fit animation ms. Capture passes 0 so a seeked frame opens already-framed. */
   fitMs?: number
 }) {
   const direction = sceneDirection(scene)
   const boxes = useMemo(() => resolveGrid(scene.nodes, scene.grid, scene.canvas), [scene])
-  // The focus band as a Set — drives both the camera framing and the lit/dimmed node states.
-  const focusSet = useMemo(() => (focus.length ? new Set(focus) : null), [focus])
+  // Camera frames `focus`; the lit/dimmed states come from `highlight` (falling back to focus).
+  const litSet = useMemo(() => {
+    const src = highlight ?? focus
+    return src.length ? new Set(src) : null
+  }, [highlight, focus])
   const nodes = useMemo(
-    () => toFlowNodes(scene, boxes, direction, reveal?.nodes ?? null, focusSet),
-    [scene, boxes, direction, reveal, focusSet],
+    () => toFlowNodes(scene, boxes, direction, reveal?.nodes ?? null, litSet),
+    [scene, boxes, direction, reveal, litSet],
   )
   const edges = useMemo(
-    () => toFlowEdges(scene, reveal?.nodes ?? null, reveal?.edges ?? null, focusSet),
-    [scene, reveal, focusSet],
+    () => toFlowEdges(scene, reveal?.nodes ?? null, reveal?.edges ?? null, litSet),
+    [scene, reveal, litSet],
   )
 
   return (

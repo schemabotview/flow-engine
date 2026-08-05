@@ -1,6 +1,6 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import type { NodeKind } from './types.ts'
-import { fitLabelPx, fitTitlePx, fitCodePx } from './fitFont.ts'
+import { fitLabelPx, fitTitlePx, fitCodePx, fitTablePx } from './fitFont.ts'
 import { getIcon } from './icons.tsx'
 import { tokenizeCode } from './codeHighlight.ts'
 import { GRAY } from './colors.ts'
@@ -20,6 +20,9 @@ export interface SceneNodeData {
   icon?: string
   /** Filename shown in the window-chrome tab of a `code` node. */
   filename?: string
+  /** For a `table` node: header labels + row data. */
+  columns?: string[]
+  rows?: string[][]
   iconInline?: boolean
   mono?: boolean
   color: string
@@ -62,6 +65,9 @@ export function SceneNode({ data }: NodeProps) {
   // A code node paints as an IDE-editor card (chrome + gutter + syntax-highlighted line),
   // not a role-colored block — a whole separate layout, so branch out early.
   if (d.kind === 'code') return <CodeCard d={d} state={state} horizontal={horizontal} />
+
+  // A table node paints as a titled data grid (header row + cell rows) — its own layout.
+  if (d.kind === 'table') return <TableCard d={d} state={state} horizontal={horizontal} />
 
   const isContainer = d.kind === 'container'
   const mono = d.kind === 'symbol' && !!d.mono
@@ -129,19 +135,17 @@ SceneNode.defaultColor = GRAY
 // optional comment line carries `sub` as `# …`. Ghost/lit/dimmed come in via `state` (scene.css
 // mutes the token colors when ghosted). Font is fit so the longest line stays on one row.
 function CodeCard({ d, state, horizontal }: { d: SceneNodeData; state: string; horizontal: boolean }) {
-  const codeChars = d.label.length
+  // Multi-line: `label` may carry several lines (split on \n), each numbered in the gutter;
+  // a `sub`, if present, trails as one more `# comment` line (kept for single-line back-compat).
+  const srcLines = d.label.split('\n')
   const commentChars = d.sub ? d.sub.length + 2 : 0 // "# " + sub
-  const lines = d.sub ? 2 : 1
+  const maxChars = Math.max(commentChars, ...srcLines.map((l) => l.length))
+  const lineCount = srcLines.length + (d.sub ? 1 : 0)
   // Reserve the chrome bar's height and the gutter's width before fitting the code font.
   const barH = Math.max(20, Math.min(d.height * 0.18, 34))
   const gutterW = 30
-  const font = fitCodePx(
-    Math.max(codeChars, commentChars),
-    d.width - gutterW - 26,
-    d.height - barH,
-    lines,
-  )
-  const tokens = tokenizeCode(d.label)
+  // Subtract the code-body's vertical padding (18px top + bottom) so the fit leaves that room.
+  const font = fitCodePx(maxChars, d.width - gutterW - 26, d.height - barH - 36, lineCount)
 
   return (
     <div
@@ -158,20 +162,59 @@ function CodeCard({ d, state, horizontal }: { d: SceneNodeData; state: string; h
         {d.filename && <span className="scene-node__code-file">{d.filename}</span>}
       </div>
       <div className="scene-node__code-body" style={{ fontSize: font }}>
-        <div className="scene-node__code-line">
-          <span className="scene-node__code-gutter">1</span>
-          <span className="scene-node__code-src">
-            {tokens.map((t, i) => (
-              <span key={i} className={`tok-${t.cls}`}>{t.text}</span>
-            ))}
-          </span>
-        </div>
+        {srcLines.map((line, li) => (
+          <div className="scene-node__code-line" key={li}>
+            <span className="scene-node__code-gutter">{li + 1}</span>
+            <span className="scene-node__code-src">
+              {tokenizeCode(line).map((t, ti) => (
+                <span key={ti} className={`tok-${t.cls}`}>{t.text}</span>
+              ))}
+            </span>
+          </div>
+        ))}
         {d.sub && (
           <div className="scene-node__code-line">
             <span className="scene-node__code-gutter" />
             <span className="scene-node__code-src tok-comment">{`# ${d.sub}`}</span>
           </div>
         )}
+      </div>
+      <Handle type="source" position={horizontal ? Position.Right : Position.Bottom} className="scene-handle" isConnectable={false} />
+    </div>
+  )
+}
+
+// A data table: a title bar + a `columns` header row + `rows` of cells — a real grid look for
+// showing sample DATA (rows/columns), distinct from a schema drawn as container + `term` rows.
+function TableCard({ d, state, horizontal }: { d: SceneNodeData; state: string; horizontal: boolean }) {
+  const cols = d.columns ?? []
+  const rows = d.rows ?? []
+  const Icon = getIcon(d.icon)
+  const titleH = Math.max(22, Math.min(d.height * 0.16, 40))
+  const maxRowChars = Math.max(cols.join('   ').length, ...rows.map((r) => r.join('   ').length), 1)
+  const font = fitTablePx(cols.length, rows.length, maxRowChars, d.width, d.height - titleH)
+
+  return (
+    <div
+      className={`scene-node scene-node--table${state}`}
+      style={{ width: d.width, height: d.height, ['--node-color' as string]: d.color }}
+    >
+      <Handle type="target" position={horizontal ? Position.Left : Position.Top} className="scene-handle" isConnectable={false} />
+      <div className="scene-node__table-title" style={{ height: titleH }}>
+        {Icon && <Icon className="scene-node__title-icon" size={Math.round(titleH * 0.5)} strokeWidth={1.75} />}
+        {d.label}
+      </div>
+      <div className="scene-node__table-wrap" style={{ fontSize: font }}>
+        <table className="scene-node__table">
+          <thead>
+            <tr>{cols.map((c, i) => <th key={i}>{c}</th>)}</tr>
+          </thead>
+          <tbody>
+            {rows.map((r, ri) => (
+              <tr key={ri}>{r.map((cellv, ci) => <td key={ci}>{cellv}</td>)}</tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       <Handle type="source" position={horizontal ? Position.Right : Position.Bottom} className="scene-handle" isConnectable={false} />
     </div>

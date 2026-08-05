@@ -26,9 +26,19 @@ export function fitLabelPx(label: string, w: number, h: number, kind: NodeKind, 
 
 /** Fit a `code` node's source line (monospace, one line, no wrap) to the body area. `chars`
  *  = the longest line's length (code vs its comment); `lines` = how many rows the body holds. */
+// Fit a data `table` node: font so the header + `rows` fit the box height, and the widest
+// row (in mono chars, plus per-column padding) fits the width. Mono, so width is predictable.
+export function fitTablePx(cols: number, rows: number, maxRowChars: number, w: number, h: number): number {
+  const byHeight = Math.max(h - 8, 6) / ((rows + 1) * 2.0) // header + N rows, ~2em row box
+  const byWidth = Math.max(w - 16, 6) / (Math.max(maxRowChars, 1) * 0.62 + cols * 1.8) // chars + cell padding
+  return Math.max(9, Math.min(byHeight, byWidth, 28)) // a data table may grow larger than a code line
+}
+
 export function fitCodePx(chars: number, w: number, h: number, lines = 1): number {
   const byWidth = Math.max(w - 8, 6) / (Math.max(chars, 1) * 0.62) // mono advance ≈ 0.62em
-  const byHeight = Math.max(h - 10, 6) / (lines * 1.55)
+  // 1.8 per line ≈ the real rendered line box: line-height 1.5 + the 0.35em inter-line gap.
+  // (Under-counting here overflows a multi-line block and clips the last line.)
+  const byHeight = Math.max(h - 10, 6) / (lines * 1.8)
   return Math.max(9, Math.min(byWidth, byHeight, 24)) // code cap
 }
 

@@ -58,6 +58,10 @@ import 'flow-engine/styles.css'
   / `useNodesInitialized` silently no-op; `fitBounds` on our own rect + a `requestAnimationFrame` is
   reliable). Empty focus → whole-scene fit (the ghosted "overview" opener). `RevealPlayer` resolves a
   section's focus via `sectionFocus` (default = the nodes it solidifies; `Section.focus` overrides).
+  **`focus` is the camera frame; `Section.highlight` is the lit set** (decoupled) — when a section
+  sets `highlight`, the camera still frames `focus` (keeping context) but only `highlight` lights and
+  the rest of the revealed scene dims. Lets a dense scene keep a WIDE frame while lighting a few nodes
+  (e.g. the query-pipeline course frames the whole `run` band and highlights one stage at a time).
 - **Reveal = pure fold of the beat index** (`reveal.ts` `revealAt`): never mutated forward. Nav
   (`nav.ts`) folds across a *scene run* (consecutive same-scene sections accumulate; a scene change
   resets to fully ghosted). This purity is what makes capture-seek and reload truthful.
@@ -108,6 +112,23 @@ npm run build     # Vite lib → dist/flow-engine.js + .css + index.d.ts
   so concept apps need no extra install.
 - **No Tailwind dependency**: the player chrome is plain CSS (`frame/player.css` + `engine/scene.css`)
   bundled into `flow-engine.css`. Consumers import `'flow-engine/styles.css'`; nothing else needed.
+
+## Recent additions (2026-08-05) — built while authoring `sql`
+
+Committed + pushed; consumers pick them up via `npm i github:schemabotview/flow-engine`. All
+additive / backward-compatible:
+1. **`table` node kind** — a data grid (`columns: string[]`, `rows: string[][]`): title bar + header
+   + cell rows. `SceneNode` `TableCard`, `fitTablePx` (cap 28), `.scene-node--table*` CSS,
+   `sceneGraph` passes `columns`/`rows` + treats `table` as a leaf. For sample DATA (vs a schema
+   drawn as container + `term` rows).
+2. **Multi-line `code` nodes** — `label` splits on `\n` into numbered lines; `codeHighlight`
+   tokenizes `--`/`#` line comments + more SQL keywords; `fitCodePx` uses 1.8/line and the caller
+   subtracts the code-body's 18px vertical padding; `.scene-node__code-src { white-space: pre }`
+   preserves indentation + aligned columns. Single-line code + `sub` comment stay unchanged.
+3. **ERD-row padding** — `.scene-node__row { box-sizing: border-box; padding: 0 22px }` so a `term`'s
+   label + `type` breathe regardless of the parent container's padding.
+4. **`Section.highlight`** — wired (was reserved): camera frames `focus`, `highlight` is the lit set.
+   `SceneViewer` gained a `highlight` prop; `RevealPlayer` passes `section.highlight`.
 
 ## Locked decisions (do not relitigate)
 
